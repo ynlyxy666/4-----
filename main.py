@@ -21,12 +21,13 @@ def bt2c():
     cw(form3,640,360)
     
 if __name__ == '__main__': 
-    run()
+    #run()
     form1=tk.Tk()
     form1.title('主界面')
     #form1.geometry('640x360')
     form1.resizable(False,False)
     cw(form1,640,360)
+    main_title=ttk.Label(form1,text='主界面',font=('Cascadia Code',20))
     bt1=ttk.Button(form1,text='打开一个时间界面',command=bt1c)
     bt1.grid(row=0,column=0)
     bt2=ttk.Button(form1,text='打开一个关于界面',command=bt2c)
