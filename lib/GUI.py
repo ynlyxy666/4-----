@@ -26,6 +26,29 @@ def help():
     #more
     cw(form4,640,360)
 
+def GUI():
+    #run()
+    form1=tk.Tk()
+    form1.title('主界面')
+    #form1.geometry('640x360')
+    form1.resizable(False,False)
+    cw(form1,640,360)
+    menu1=tk.Menu(form1)
+    form1.config(menu=menu1)
+    menu1.add_command(label='帮助')
+    menu1.add_command(label='关于',command=About)
+    menu1_1=tk.Menu(menu1)
+    menu1_1.add_command(label='退出')
+    menu1.add_cascade(label='文件',menu=menu1_1)
+    #menu1.add_cascade(label='菜单',menu=menu1)
+    main_title=ttk.Label(form1,text='主界面',font=('Cascadia Code',20))
+    main_title.grid(row=0,column=0)
+    bt1=ttk.Button(form1,text='打开一个时间界面',command=bt1c)
+    bt1.grid(row=1,column=0)
+    #bt2=ttk.Button(form1,text='打开一个关于界面',command=bt2c)
+    #bt2.grid(row=2,column=0)
+    form1.mainloop()
+
 if __name__ == '__main__': 
     #run()
     form1=tk.Tk()
