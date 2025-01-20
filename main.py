@@ -20,6 +20,12 @@ def About():
     lb2=ttk.Label(form3,text='关于界面',font=('Cascadia Code',10))
     cw(form3,640,360)
     
+def help():
+    form4=tk.Toplevel(form1)
+    form4.title('帮助')
+    #more
+    cw(form4,640,360)
+
 if __name__ == '__main__': 
     #run()
     form1=tk.Tk()
