@@ -1,8 +1,8 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-from lib.StartupMovie import run
+from StartupMovie import run
 import time
-from lib.CenterWindow import center_window as cw
+from CenterWindow import center_window as cw
 
 def bt1c():
     #bt1.config(text='只能打开一次的哦')
