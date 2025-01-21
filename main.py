@@ -6,6 +6,8 @@ import time
 from lib.CenterWindow import center_window as cw
 import lib.info as info
 import sys
+import psutil
+import threading
 
 def bt1c():
     #bt1.config(text='只能打开一次的哦')
@@ -20,7 +22,7 @@ def bt1c():
 def About():
     form3=tk.Toplevel(form1)
     form3.title('关于')
-    msgbx=tk.Message(form3,text=info.about,font=('Cascadia Code',10),width=300)
+    msgbx=tk.Message(form3,text=info.about,font=('楷体',15),width=300)
     msgbx.pack(padx=30,pady=30)
     form3.resizable(False,False)
     cw(form3,360,220)
@@ -39,6 +41,7 @@ def help():
 def quit():
     form1.destroy()
     sys.exit()
+
 
 if __name__ == '__main__': 
     #run()
