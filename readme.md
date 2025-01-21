@@ -13,7 +13,7 @@ pyqt5
 4. 运行main.py
 
 文件说明：
-1. start.py为程序启动器
+1. main.py为程序启动器
 2. ".vscode"为vscode的配置文件
 3. "辅助程序“为代码编写过程中使用的自己编写的小工具
 4. "lib"为程序使用的库
@@ -21,6 +21,5 @@ pyqt5
 === lib ===
 1. "CenterWindow.py"为居中窗口的工具
 2. "info.py"收录了程序使用的所有长字符串
-3. "GUI.py"为主程序
 4. "StartupMovie.py"为程序启动画面
 5. "help.dat"为帮助文件

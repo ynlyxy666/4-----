@@ -12,7 +12,7 @@ class MySplashScreen(QSplashScreen):
         super(MySplashScreen, self).__init__()
  
         # 新建动画
-        self.movie = QMovie(r'gif.gif')
+        self.movie = QMovie(r'lib/gif.gif')
         self.movie.frameChanged.connect(lambda: self.setPixmap(self.movie.currentPixmap()))
         self.movie.start()
  

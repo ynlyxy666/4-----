@@ -8,6 +8,7 @@ import lib.info as info
 import sys
 import psutil
 import threading
+import lib.help
 
 def bt1c():
     #bt1.config(text='只能打开一次的哦')
@@ -32,7 +33,7 @@ def help():
     form4.title('帮助')
     ht=st.ScrolledText(form4)
     ht.config(state=tk.NORMAL)
-    ht.insert(tk.END,info.help)
+    ht.insert(tk.END,lib.help.help)
     ht.config(state=tk.DISABLED)
     ht.pack()
     form4.resizable(False,False)
@@ -44,7 +45,7 @@ def quit():
 
 
 if __name__ == '__main__': 
-    #run()
+    run()
     form1=tk.Tk()
     form1.title('主界面')
     form1.resizable(False,False)
