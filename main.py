@@ -26,9 +26,13 @@ def About():
     cw(form3,360,220)
     
 def help():
+    fp=open('help.dat','r',encoding='utf-8')
+    helptext=fp.read()
     form4=tk.Toplevel(form1)
     form4.title('帮助')
     ht=st.ScrolledText(form4)
+    ht.config(state=tk.NORMAL)
+    ht.insert(tk.END,helptext)
     ht.config(state=tk.DISABLED)
     ht.pack()
     form4.resizable(False,False)
