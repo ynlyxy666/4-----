@@ -4,11 +4,13 @@ import tkinter.ttk as ttk
 import tkinter.scrolledtext as st
 from lib.StartupMovie import run
 import time
+import lib.helptxt
 from lib.CenterWindow import center_window as cw
 import lib.info as info
 import sys
 import psutil
 import threading
+
 
 
 def bt1c():
@@ -29,12 +31,12 @@ def About():
     form3.resizable(False,False)
     cw(form3,360,220)
     
-def help():
+def helptxt():
     form4=tk.Toplevel(form1)
     form4.title('帮助')
     ht=st.ScrolledText(form4)
     ht.config(state=tk.NORMAL)
-    ht.insert(tk.END,info.help)
+    ht.insert(tk.END,lib.helptxt.text)
     ht.config(state=tk.DISABLED)
     ht.config(font=('Arial',15))
     ht.pack()
@@ -47,7 +49,8 @@ def quit():
 
 
 if __name__ == '__main__': 
-    run()
+    #print(sys.path)
+    #run()
     form1=tk.Tk()
     form1.title('主界面')
     form1.resizable(False,False)
@@ -57,7 +60,7 @@ if __name__ == '__main__':
     menu1_1=tk.Menu(menu1,tearoff=False)
     menu1_1.add_command(label='退出',command=quit)
     menu1.add_cascade(label='文件',menu=menu1_1)
-    menu1.add_command(label='帮助',command=help)
+    menu1.add_command(label='帮助',command=helptxt)
     menu1.add_command(label='关于',command=About)
     main_title=ttk.Label(form1,text='主界面',font=('华文彩云',20))
     main_title.grid(row=0,column=0)
