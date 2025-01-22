@@ -1,3 +1,4 @@
+#coding=utf-8
 import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.scrolledtext as st
@@ -8,7 +9,7 @@ import lib.info as info
 import sys
 import psutil
 import threading
-import lib.help
+
 
 def bt1c():
     #bt1.config(text='只能打开一次的哦')
@@ -33,8 +34,9 @@ def help():
     form4.title('帮助')
     ht=st.ScrolledText(form4)
     ht.config(state=tk.NORMAL)
-    ht.insert(tk.END,lib.help.help)
+    ht.insert(tk.END,info.help)
     ht.config(state=tk.DISABLED)
+    ht.config(font=('Arial',15))
     ht.pack()
     form4.resizable(False,False)
     cw(form4,640,360)
