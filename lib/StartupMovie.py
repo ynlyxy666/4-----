@@ -1,18 +1,26 @@
-
 import time
- 
+import os
+import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
 from PyQt5.QtGui import QFont, QMovie
 from PyQt5.QtWidgets import QMainWindow, QSplashScreen
  
+def get_path(relative_path):
+    try:
+        base_path = sys._MEIPASS # pyinstaller打包后的路径
+    except AttributeError:
+        base_path = os.path.abspath(".") # 当前工作目录的路径
  
+    return os.path.normpath(os.path.join(base_path, relative_path)) # 返回实际路径
+
+
 class MySplashScreen(QSplashScreen):
     def __init__(self):
         super(MySplashScreen, self).__init__()
  
         # 新建动画
-        self.movie = QMovie(r'gif.gif')
+        self.movie = QMovie(get_path('gif.gif'))
         self.movie.frameChanged.connect(lambda: self.setPixmap(self.movie.currentPixmap()))
         self.movie.start()
  
