@@ -1,17 +1,24 @@
 #coding=utf-8
-import tkinter as tk
-import tkinter.ttk as ttk
-import tkinter.scrolledtext as st
-from lib.StartupMovie import run
-import time
-import lib.helptxt
-from lib.CenterWindow import center_window as cw
-import lib.info as info
+import os
 import sys
+import time
 import psutil
 import threading
+import lib.helptxt
+import tkinter as tk
+import lib.info as info
+import tkinter.ttk as ttk
+from lib.StartupMovie import run
+import tkinter.scrolledtext as st
+from lib.CenterWindow import center_window as cw
 
-
+def get_path(relative_path):
+    try:
+        base_path = sys._MEIPASS # pyinstaller打包后的路径
+    except AttributeError:
+        base_path = os.path.abspath(".") # 当前工作目录的路径
+ 
+    return os.path.normpath(os.path.join(base_path, relative_path)) # 返回实际路径
 
 def bt1c():
     #bt1.config(text='只能打开一次的哦')
@@ -47,10 +54,9 @@ def quit():
     form1.destroy()
     sys.exit()
 
-
 if __name__ == '__main__': 
     #print(sys.path)
-    #run()
+    run()
     form1=tk.Tk()
     form1.title('主界面')
     form1.resizable(False,False)
