@@ -8,9 +8,13 @@ import lib.helptxt
 import tkinter as tk
 import lib.info as info
 import tkinter.ttk as ttk
+from PyQt5 import QtWidgets
 from lib.StartupMovie import run
 import tkinter.scrolledtext as st
+from PyQt5.QtGui import QFont, QMovie
 from lib.CenterWindow import center_window as cw
+from PyQt5.QtWidgets import QMainWindow, QSplashScreen
+from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
 
 def gui():
     def bt1c():

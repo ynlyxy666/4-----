@@ -23,5 +23,18 @@ python3.10,推荐安装python3.12+
 1. "CenterWindow.py"为居中窗口的工具
 2. "info.py"收录了程序使用的所有长字符串
 4. "StartupMovie.py"为程序启动画面
-5. "help.dat"为帮助文件
+5. "helptxt.py"为帮助文件
+
+备注
+对于反编译就不要想了 :)
+我已经做了编译为pyd文件以防止反编译
+你反编译出来也只是这几行代码：
+from lib.gui import gui
+
+if __name__ == '__main__':
+    gui()
+想试试的到网上去搜吧
+不用白费力气
+开头说了，完全开源
+到github上看就可以了
 '''
