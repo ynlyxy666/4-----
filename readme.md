@@ -23,6 +23,3 @@ pyqt5
 2. "info.py"收录了程序使用的所有长字符串
 4. "StartupMovie.py"为程序启动画面
 5. "help.dat"为帮助文件
-
-打包命令：
-pyinstaller -F -w --add-data gif.gif;gif.gif main.py
