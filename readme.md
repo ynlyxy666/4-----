@@ -24,5 +24,3 @@ pyqt5
 4. "StartupMovie.py"为程序启动画面
 5. "help.dat"为帮助文件
 
-打包命令：
-pyinstaller -F -w --add-data gif.gif;gif.gif main.py
