@@ -1,19 +1,19 @@
 #coding=utf-8
-#1
 import os
 import sys
 import time
 import psutil
 import threading
-import lib.helptxt
+import gui.helptext
 import tkinter as tk
-import lib.info as info
+import gui.info as info
 import tkinter.ttk as ttk
+from gui.helptext import text
 from PyQt5 import QtWidgets
-from lib.StartupMovie import run
+from gui.StartupMovie import run
 import tkinter.scrolledtext as st
 from PyQt5.QtGui import QFont, QMovie
-from lib.CenterWindow import center_window as cw
+from gui.CenterWindow import center_window as cw
 from PyQt5.QtWidgets import QMainWindow, QSplashScreen
 from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
 
@@ -41,7 +41,7 @@ def gui():
         form4.title('帮助')
         ht=st.ScrolledText(form4)
         ht.config(state=tk.NORMAL)
-        ht.insert(tk.END,lib.helptxt.text)
+        ht.insert(tk.END,text)
         ht.config(state=tk.DISABLED)
         ht.config(font=('Arial',15))
         ht.pack()
