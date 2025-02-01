@@ -8,8 +8,8 @@ import gui.helptext
 import tkinter as tk
 import gui.info as info
 import tkinter.ttk as ttk
-from gui.helptext import text
 from PyQt5 import QtWidgets
+from gui.helptext import text
 from gui.StartupMovie import run
 import tkinter.scrolledtext as st
 from PyQt5.QtGui import QFont, QMovie
@@ -69,6 +69,3 @@ def gui():
     bt1=ttk.Button(form1,text='打开一个界面',command=bt1c)
     bt1.grid(row=1,column=0)
     form1.mainloop()
-
-if __name__ == '__main__':
-    gui()
