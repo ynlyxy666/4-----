@@ -32,9 +32,9 @@ def schedule_courses(courses, teachers, classrooms, schedule, index=0):
     return False
 
 # 示例数据
-courses = ['Math', 'Science', 'History']
-teachers = [{'name': 'Alice', 'availability': [1, 1, 0, 1]}, {'name': 'Bob', 'availability': [1, 1, 1, 0]}]
-classrooms = [{'name': 'Room 101', 'availability': [1, 1, 1, 1]}, {'name': 'Room 102', 'availability': [1, 0, 1, 1]}]
+courses = ['语文', '数学', '英语', '政治', '历史', '物理', '化学', '音乐', '体育', '美术', '信息', '劳技', '社团', '外教', '自习'] * 2  # 每个班级有16门课程，共30个班级
+teachers = [{'name': 'Teacher {}'.format(i), 'availability': [1] * 10} for i in range(30)]  # 30名教师，每人10个可用时间段
+classrooms = [{'name': 'Room {}'.format(i), 'availability': [1] * 10} for i in range(30)]  # 30个教室，每个教室10个可用时间段
 schedule = []
 
 if schedule_courses(courses, teachers, classrooms, schedule):

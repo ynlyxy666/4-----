@@ -3,15 +3,18 @@ import os
 import sys
 import time
 import psutil
+import pystray
 import threading
 import gui.helptext
 import tkinter as tk
+from PIL import Image
 import gui.info as info
 import tkinter.ttk as ttk
 from PyQt5 import QtWidgets
 from gui.helptext import text
 from gui.StartupMovie import run
 import tkinter.scrolledtext as st
+from pystray import MenuItem, Menu
 from PyQt5.QtGui import QFont, QMovie
 from gui.CenterWindow import center_window as cw
 from PyQt5.QtWidgets import QMainWindow, QSplashScreen
@@ -51,6 +54,17 @@ def gui():
     def quit():
         form1.destroy()
         sys.exit()
+
+    def quit_window(icon: pystray.Icon): #type:ignore
+        icon.stop()
+        form1.destroy()
+
+    def show_window():
+        form1.deiconify()
+
+    def on_exit():
+        form1.withdraw()
+
     #print(sys.path)
     run()
     form1=tk.Tk()
@@ -68,4 +82,9 @@ def gui():
     main_title.grid(row=0,column=0)
     bt1=ttk.Button(form1,text='打开一个界面',command=bt1c)
     bt1.grid(row=1,column=0)
+    menu = (MenuItem('显示', show_window, default=True), Menu.SEPARATOR, MenuItem('退出', quit_window))
+    image = Image.open("tray.png")
+    icon = pystray.Icon("icon", image, "图标名称", menu)
+    form1.protocol('WM_DELETE_WINDOW', on_exit)
+    threading.Thread(target=icon.run, daemon=True).start()
     form1.mainloop()
