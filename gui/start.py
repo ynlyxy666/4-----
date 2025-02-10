@@ -1,10 +1,5 @@
 #coding=utf-8
-import os
-import sys
-import time
-import psutil
-import pystray
-import threading
+
 import gui.helptext
 import tkinter as tk
 from PIL import Image
@@ -16,6 +11,7 @@ from gui.StartupMovie import run
 import tkinter.scrolledtext as st
 from pystray import MenuItem, Menu
 from PyQt5.QtGui import QFont, QMovie
+import os,sys,time,psutil,pystray,threading
 from gui.CenterWindow import center_window as cw
 from PyQt5.QtWidgets import QMainWindow, QSplashScreen
 from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
@@ -80,8 +76,8 @@ def gui():
     menu1.add_command(label='关于',command=About)
     main_title=ttk.Label(form1,text='主界面',font=('华文彩云',20))
     main_title.grid(row=0,column=0)
-    bt1=ttk.Button(form1,text='打开一个界面',command=bt1c)
-    bt1.grid(row=1,column=0)
+    #bt1=ttk.Button(form1,text='打开一个界面',command=bt1c)
+    #bt1.grid(row=1,column=0)
     menu = (MenuItem('显示', show_window, default=True), Menu.SEPARATOR, MenuItem('退出', quit_window))
     image = Image.open("tray.png")
     icon = pystray.Icon("icon", image, "图标名称", menu)
