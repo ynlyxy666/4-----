@@ -25,4 +25,4 @@ pyqt5
 5. "help.dat"为帮助文件
 
 打包指令：
-pyinstaller -F -w --add-data "gif.gif;." main.pyw
+pyinstaller -F -w --add-data "gif.gif;." --add-data "tray.png;." main.pyw

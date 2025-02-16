@@ -17,6 +17,20 @@ from PyQt5.QtWidgets import QMainWindow, QSplashScreen
 from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
 
 def gui():
+    def get_path(relative_path):
+        try:
+            base_path = sys._MEIPASS # pyinstaller打包后的路径
+        except AttributeError:
+            base_path = os.path.abspath(".") # 当前工作目录的路径
+ 
+        return os.path.normpath(os.path.join(base_path, relative_path)) # 返回实际路径
+
+    def create_image():
+        # 加载自定义的PNG图标文件
+        img_path=get_path("tray.png")
+        image = Image.open(img_path)
+        return image
+
     def bt1c():
         #bt1.config(text='只能打开一次的哦')
         #bt1.config(state='disabled')
@@ -79,7 +93,7 @@ def gui():
     #bt1=ttk.Button(form1,text='打开一个界面',command=bt1c)
     #bt1.grid(row=1,column=0)
     menu = (MenuItem('显示', show_window, default=True), Menu.SEPARATOR, MenuItem('退出', quit_window))
-    image = Image.open("tray.png")
+    image = create_image()
     icon = pystray.Icon("icon", image, "图标名称", menu)
     form1.protocol('WM_DELETE_WINDOW', on_exit)
     threading.Thread(target=icon.run, daemon=True).start()

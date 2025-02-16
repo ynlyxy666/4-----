@@ -36,7 +36,7 @@ class LoadDataWorker(QObject):
         super(LoadDataWorker, self).__init__()
  
     def run(self):
-        for i in range(90):
+        for i in range(48):
             time.sleep(0.1)
             #self.message_signal.emit(f'加载中...{str(i * 10)}%')
         self.finished.emit()

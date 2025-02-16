@@ -1,12 +1,23 @@
+import os
 import pystray
 from pystray import MenuItem as item
 from PIL import Image, ImageDraw
 import threading
 import time
 KeyboardInterrupt=1
+
+def get_path(relative_path):
+    try:
+        base_path = sys._MEIPASS # pyinstaller打包后的路径
+    except AttributeError:
+        base_path = os.path.abspath(".") # 当前工作目录的路径
+ 
+    return os.path.normpath(os.path.join(base_path, relative_path)) # 返回实际路径
+
 def create_image():
     # 加载自定义的PNG图标文件
-    image = Image.open("tray.png")
+    img_path=get_path("tray.png")
+    image = Image.open(img_path)
     return image
 
 def on_clicked(icon, item):
