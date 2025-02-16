@@ -44,7 +44,7 @@ def gui():
     def About():
         form3=tk.Toplevel(form1)
         form3.title('关于')
-        msgbx=tk.Message(form3,text=info.about,font=('楷体',15),width=300)
+        msgbx=tk.Message(form3,text=info.about,font=('楷体',10),width=300)
         msgbx.pack(padx=30,pady=30)
         form3.resizable(False,False)
         cw(form3,360,220)
