@@ -76,7 +76,7 @@ def gui():
         form1.withdraw()
 
     #print(sys.path)
-    run()
+    #run()
     form1=tk.Tk()
     form1.title('主界面')
     form1.resizable(False,False)
