@@ -1,16 +1,20 @@
 #coding=utf-8
 
+import gui.helptext
 import tkinter as tk
+from PIL import Image
 import gui.info as info
 import tkinter.ttk as ttk
+from PyQt5 import QtWidgets
 from gui.helptext import text
-import tkinter.scrolledtext as st
-import os,sys
-from gui.CenterWindow import center_window as cw
-from tkinter import filedialog, messagebox
-import os
-import sys
 from gui.StartupMovie import run
+import tkinter.scrolledtext as st
+from pystray import MenuItem, Menu
+from PyQt5.QtGui import QFont, QMovie
+import os,sys,time,psutil,pystray,threading
+from gui.CenterWindow import center_window as cw
+from PyQt5.QtWidgets import QMainWindow, QSplashScreen
+from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
 
 def gui():
     def get_path(relative_path):
@@ -45,61 +49,22 @@ def gui():
         form1.destroy()
         sys.exit()
 
-    def start_scheduling():
-        # 这里可以添加生成课表的逻辑
-        messagebox.showinfo("提示", "开始生成课表")
-
-    def import_courses():
-        file_path = filedialog.askopenfilename(filetypes=[("CSV files", "*.csv")])
-        if file_path:
-            # 这里可以添加导入课程信息的逻辑
-            messagebox.showinfo("提示", f"导入了课程信息: {file_path}")
-
-    def export_schedule():
-        file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv")])
-        if file_path:
-            # 这里可以添加导出课表的逻辑
-            messagebox.showinfo("提示", f"导出了课表: {file_path}")
-
-    def preview_schedule():
-        # 这里可以添加预览课表的逻辑
-        messagebox.showinfo("提示", "预览课表")
-    
+    #print(sys.path)
     run()
-    form1 = tk.Tk()
-    form1.title('自动课表设计')
+    form1=tk.Tk()
+    form1.title('课表生成')
     style = ttk.Style()
     style.theme_use('alt')
-    form1.resizable(False, False)
-    cw(form1, 640, 360)
-    menu1 = tk.Menu(form1, tearoff=False)
+    form1.resizable(False,False)
+    cw(form1,640,360)
+    menu1=tk.Menu(form1,tearoff=False)
     form1.config(menu=menu1)
-    menu1_1 = tk.Menu(menu1, tearoff=False)
-    menu1_1.add_command(label='退出', command=quit)
-    menu1.add_cascade(label='文件', menu=menu1_1)
-    menu1.add_command(label='帮助', command=helptxt)
-    menu1.add_command(label='关于', command=About)
-
-    # 添加更多的控件
-    ttk.Label(form1, text="课程名称:").grid(row=0, column=0, padx=10, pady=10)
-    course_name_entry = ttk.Entry(form1)
-    course_name_entry.grid(row=0, column=1, padx=10, pady=10)
-
-    ttk.Label(form1, text="课程时间:").grid(row=1, column=0, padx=10, pady=10)
-    course_time_entry = ttk.Entry(form1)
-    course_time_entry.grid(row=1, column=1, padx=10, pady=10)
-
-    import_button = ttk.Button(form1, text='导入课程', command=import_courses)
-    import_button.grid(row=2, column=0, padx=10, pady=10)
-
-    export_button = ttk.Button(form1, text='导出课表', command=export_schedule)
-    export_button.grid(row=2, column=1, padx=10, pady=10)
-
-    preview_button = ttk.Button(form1, text='预览课表', command=preview_schedule)
-    preview_button.grid(row=2, column=2, padx=10, pady=10)
-
-    start_button = ttk.Button(form1, text='开始生成课表', command=start_scheduling)
-    start_button.grid(row=3, column=0, columnspan=3, padx=10, pady=10)
-
+    menu1_1=tk.Menu(menu1,tearoff=False)
+    menu1_1.add_command(label='退出',command=quit)
+    menu1.add_cascade(label='文件',menu=menu1_1)
+    menu1.add_command(label='帮助',command=helptxt)
+    menu1.add_command(label='关于',command=About)
+    bt1=ttk.Button(form1,text='开始',command=About)
+    bt1.pack(padx=4)
     form1.protocol('WM_DELETE_WINDOW', quit)
     form1.mainloop()
