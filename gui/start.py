@@ -10,6 +10,7 @@ from gui.CenterWindow import center_window as cw
 from tkinter import filedialog, messagebox
 import os
 import sys
+from gui.StartupMovie import run
 
 def gui():
     def get_path(relative_path):
@@ -64,12 +65,13 @@ def gui():
         # 这里可以添加预览课表的逻辑
         messagebox.showinfo("提示", "预览课表")
     
+    run()
     form1 = tk.Tk()
     form1.title('自动课表设计')
     style = ttk.Style()
     style.theme_use('alt')
     form1.resizable(False, False)
-    cw(form1, 800, 600)
+    cw(form1, 640, 360)
     menu1 = tk.Menu(form1, tearoff=False)
     form1.config(menu=menu1)
     menu1_1 = tk.Menu(menu1, tearoff=False)
