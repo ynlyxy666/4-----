@@ -4,6 +4,7 @@ from pystray import MenuItem as item
 from PIL import Image, ImageDraw
 import threading
 import time
+import sys
 KeyboardInterrupt=1
 
 def get_path(relative_path):
