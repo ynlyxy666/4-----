@@ -2,7 +2,7 @@
 
 import gui.helptext
 import tkinter as tk
-from PIL import Image
+from PIL import Image, ImageTk
 import gui.info as info
 import tkinter.ttk as ttk
 from PyQt5 import QtWidgets
@@ -28,20 +28,24 @@ def gui():
     def About():
         form3=tk.Toplevel(form1)
         form3.title('关于')
-        msgbx=tk.Message(form3,text=info.about,font=('楷体',10),width=300)
+        msgbx=tk.Message(form3,text=info.about,font=('楷体',12),width=300, bg='#f0f0f0')
         msgbx.pack(padx=30,pady=30)
         form3.resizable(False,False)
-        cw(form3,360,220)
+        cw(form3,640,360)
     
     def helptxt():
         form4=tk.Toplevel(form1)
         form4.title('帮助')
-        ht=st.ScrolledText(form4)
+        menu=tk.Menu(form1,tearoff=False, font=('Arial', 12))
+        form4.config(menu=menu)
+        menu1=tk.Menu(menu,tearoff=False, font=('Arial', 12))
+        menu1.add_command(label='退出',command=quit)
+        menu.add_cascade(label='文件',menu=menu1_1)
+        ht=st.ScrolledText(form4, bg='#f0f0f0', font=('Arial',14))
         ht.config(state=tk.NORMAL)
         ht.insert(tk.END,text)
         ht.config(state=tk.DISABLED)
-        ht.config(font=('Arial',15))
-        ht.pack()
+        ht.pack(padx=20, pady=20)
         form4.resizable(False,False)
         cw(form4,640,360)
 
@@ -49,22 +53,32 @@ def gui():
         form1.destroy()
         sys.exit()
 
-    #print(sys.path)
-    run()
+    #run()
     form1=tk.Tk()
     form1.title('课表生成')
-    #style = ttk.Style()
-    #style.theme_use('alt')
     form1.resizable(False,False)
     cw(form1,640,360)
-    menu1=tk.Menu(form1,tearoff=False)
+
+    # 设置背景图片
+    bg_image_path = get_path('src/bg.jpg')
+    bg_image = Image.open(bg_image_path)
+    bg_photo = ImageTk.PhotoImage(bg_image)
+    bg_label = tk.Label(form1, image=bg_photo)
+    bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+    menu1=tk.Menu(form1,tearoff=False, font=('Arial', 12))
     form1.config(menu=menu1)
-    menu1_1=tk.Menu(menu1,tearoff=False)
+    menu1_1=tk.Menu(menu1,tearoff=False, font=('Arial', 12))
     menu1_1.add_command(label='退出',command=quit)
     menu1.add_cascade(label='文件',menu=menu1_1)
     menu1.add_command(label='帮助',command=helptxt)
     menu1.add_command(label='关于',command=About)
+
+    # 使用更美观的按钮样式
+    style = ttk.Style()
+    style.configure('TButton', font=('Arial', 12), foreground='blue', background='lightgray')
     #bt1=ttk.Button(form1,text='开始',command=About)
     #bt1.pack(padx=4)
+
     form1.protocol('WM_DELETE_WINDOW', quit)
     form1.mainloop()
