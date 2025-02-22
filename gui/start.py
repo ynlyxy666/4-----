@@ -22,7 +22,7 @@ def gui():
             base_path = sys._MEIPASS # pyinstaller打包后的路径
         except AttributeError:
             base_path = os.path.abspath(".") # 当前工作目录的路径
- 
+
         return os.path.normpath(os.path.join(base_path, relative_path)) # 返回实际路径
 
     def About():
@@ -31,7 +31,7 @@ def gui():
         msgbx=tk.Message(form3,text=info.about,font=('楷体',12),width=300, bg='#f0f0f0')
         msgbx.pack(padx=30,pady=30)
         form3.resizable(False,False)
-        cw(form3,640,360)
+        cw(form3,360,220)
     
     def helptxt():
         form4=tk.Toplevel(form1)
@@ -60,11 +60,20 @@ def gui():
     cw(form1,640,360)
 
     # 设置背景图片
-    bg_image_path = get_path('src/bg.jpg')
+    bg_image_path = get_path('src/bg2.jpg')
     bg_image = Image.open(bg_image_path)
+    # 调整图片大小以适应窗口
     bg_photo = ImageTk.PhotoImage(bg_image)
     bg_label = tk.Label(form1, image=bg_photo)
     bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+    # 添加白框
+    white_box = tk.Label(form1, bg='white', width=20, height=18)
+    white_box.place(relx=1.0, rely=0.0, x=-20, y=20, anchor='ne')
+
+    # 添加欢迎二字
+    welcome_label = tk.Label(form1, text='欢迎', font=('Arial', 32))
+    welcome_label.place(relx=0.0, rely=0.0, x=20, y=20, anchor='nw')
 
     menu1=tk.Menu(form1,tearoff=False, font=('Arial', 12))
     form1.config(menu=menu1)
