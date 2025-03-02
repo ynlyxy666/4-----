@@ -54,7 +54,7 @@ def gui():
         form1.destroy()
         sys.exit()
 
-    run()
+    #run()
     
     # 启用高DPI缩放支持
     form1=tk.Tk()
