@@ -1,21 +1,15 @@
 #coding=utf-8
 
-import gui.helptext
 import tkinter as tk
 from PIL import Image, ImageTk
 import gui.info as info
 import tooltip
 import tkinter.ttk as ttk
-from PyQt5 import QtWidgets
-from gui.helptext import text
 from gui.StartupMovie import run
 import tkinter.scrolledtext as st
-from pystray import MenuItem, Menu
-from PyQt5.QtGui import QFont, QMovie
-import os,sys,time,psutil,pystray,threading
+import os,sys
 from gui.CenterWindow import center_window as cw
-from PyQt5.QtWidgets import QMainWindow, QSplashScreen
-from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
+
 
 def gui():
     def get_path(relative_path):
@@ -34,21 +28,43 @@ def gui():
         form3.resizable(False,False)
         cw(form3,360,220)
     
+    def helpcust():
+        form6=tk.Toplevel(form1)
+        form6.title('开发人员说明')
+        menu=tk.Menu(form1,tearoff=False, font=('微软雅黑', 12))
+        form6.config(menu=menu)
+        menu1=tk.Menu(menu,tearoff=False, font=('微软雅黑', 12))
+        menu1.add_command(label='退出',command=quit)
+        menu.add_cascade(label='文件',menu=menu1_1)
+        ht=st.ScrolledText(form6, bg='#f0f0f0', font=('微软雅黑',14))
+        ht.config(state=tk.NORMAL)
+        ht.insert(tk.END,info.helpcus)
+        ht.config(state=tk.DISABLED)
+        ht.pack(padx=20, pady=20)
+        form6.resizable(False,False)
+        cw(form6,640,360)
+
     def About():
         form4=tk.Toplevel(form1)
         form4.title('开发人员说明')
-        menu=tk.Menu(form1,tearoff=False, font=('Arial', 12))
+        menu=tk.Menu(form1,tearoff=False, font=('微软雅黑', 12))
         form4.config(menu=menu)
-        menu1=tk.Menu(menu,tearoff=False, font=('Arial', 12))
+        menu1=tk.Menu(menu,tearoff=False, font=('微软雅黑', 12))
         menu1.add_command(label='退出',command=quit)
         menu.add_cascade(label='文件',menu=menu1_1)
-        ht=st.ScrolledText(form4, bg='#f0f0f0', font=('Arial',14))
+        ht=st.ScrolledText(form4, bg='#f0f0f0', font=('微软雅黑',14))
         ht.config(state=tk.NORMAL)
-        ht.insert(tk.END,text)
+        ht.insert(tk.END,info.helpdev)
         ht.config(state=tk.DISABLED)
         ht.pack(padx=20, pady=20)
         form4.resizable(False,False)
         cw(form4,640,360)
+
+    def advanced():
+        form5=tk.Toplevel(form1)
+        form5.title('高级设置')
+        form5.resizable(False,False)
+        cw(form5,640,360)
 
     def quit():
         form1.destroy()
@@ -74,7 +90,7 @@ def gui():
     white_box = tk.Label(form1, bg='white', width=20, height=18)# 添加白框
     white_box.place(relx=1.0, rely=0.0, x=-20, y=20, anchor='ne')
     
-    canvas.create_text(100, 50, text='欢迎', fill='black', font=('Arial', 32))# 在Canvas上绘制文字
+    canvas.create_text(100, 50, text='欢迎', fill='black', font=('隶书', 32))# 在Canvas上绘制文字
     
     style = ttk.Style()# 使用更美观的按钮样式
     style.configure('TButton', font=('楷体', 12), foreground='black', background='lightgray', borderwidth=0)  # 修改字体为楷体，并去除边框
@@ -87,23 +103,23 @@ def gui():
     advanced_icon_path = get_path('src/ico/advanced.png')  # 假设图标文件名为advanced_icon.png
     advanced_icon = tk.PhotoImage(file=advanced_icon_path)
     
-    advanced_button = ttk.Button(form1, image=advanced_icon, command=lambda: print("高级设置按钮被点击"), style='TButton')
+    advanced_button = ttk.Button(form1, image=advanced_icon, command=advanced, style='TButton')
     advanced_button.image = advanced_icon  # 保持对图像对象的引用，防止被垃圾回收
     advanced_button.place(relx=1.0, rely=1.0, x=-130, y=-39, anchor='se')  # 调整x和y值以控制按钮的位置
 
     # 添加工具提示
     advanced_button_tooltip = tooltip.ToolTip(advanced_button, text="高级设置")
 
-    menu1=tk.Menu(form1,tearoff=False, font=('Arial', 12))
+    menu1=tk.Menu(form1,tearoff=False, font=('微软雅黑', 12))
     form1.config(menu=menu1)
     
-    menu1_1=tk.Menu(menu1,tearoff=False, font=('Arial', 12))
+    menu1_1=tk.Menu(menu1,tearoff=False, font=('微软雅黑', 12))
     menu1_1.add_command(label='退出',command=quit)
     
     menu1.add_cascade(label='文件',menu=menu1_1)
-    menu1.add_command(label='帮助',command=helptxt)
+    menu1.add_command(label='帮助',command=helpcust)
     
-    menu1_2=tk.Menu(menu1,tearoff=False, font=('Arial', 12))
+    menu1_2=tk.Menu(menu1,tearoff=False, font=('微软雅黑', 12))
     menu1_2.add_command(label='作者信息',command=helptxt)
     menu1_2.add_command(label='开发人员说明',command=About)
     
