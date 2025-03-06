@@ -3,20 +3,31 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 import gui.info as info
-import tooltip
+import tooltip, threading
 import tkinter.ttk as ttk
 from gui.StartupMovie import run
 import tkinter.scrolledtext as st
 import os,sys, ctypes
 from gui.CenterWindow import center_window as cw
 from pygame import mixer
+from multiprocessing import Process
 
 # 新增DPI强制缩放设置
 import ctypes
 try:
-    ctypes.windll.shcore.SetProcessDpiAwareness(2)
+    ctypes.windll.shcore.SetProcessDpiAwareness(1)
 except:
     pass
+
+def music():
+    mixer.init()
+    print("init success")
+    mixer.music.load("bgm.ogg")
+    print('src file loaded')
+    mixer.music.play(-1)
+    print('play')
+    mixer.music.set_volume(0.5)
+    print('set volume')
 
 def gui():
     def get_path(relative_path):
@@ -77,17 +88,23 @@ def gui():
         form1.destroy()
         sys.exit()
 
-    def on_bottom_left_button_click():
-        #print(pause)
-        if pause:
-            mixer.music.unpause()
-            pause = False
-        else:
-            mixer.music.pause()
-            pause = True
 
     #run()
-    
+
+    stmv = Process(target=run)
+    #stmv.start()
+
+    try:
+        mixer.init()
+        mixer.music.load("bgm.ogg")
+        mixer.music.play(-1)
+        mixer.music.set_volume(0.5)
+        print("音乐老师，走！")
+    except Exception as e:
+        print("音乐走起失败")
+
+    #stmv.join()
+
     ## 启用高DPI缩放支持
     form1=tk.Tk()
     dpi = form1.tk.call('tk', 'scaling')
@@ -98,12 +115,6 @@ def gui():
     form1.title('课表生成')
     form1.resizable(False,False)
     cw(form1,640,360)
-    
-    mixer.init()
-    mixer.music.load("bgm.ogg")
-    mixer.music.play(-1)
-    mixer.music.set_volume(0.5)
-    pause = False
 
     bg_image_path = get_path('src/bg2.jpg') # 设置背景图片
     bg_image = Image.open(bg_image_path)
@@ -113,15 +124,32 @@ def gui():
     canvas.pack(fill='both', expand=True)
     canvas.create_image(0, 0, image=bg_photo, anchor='nw')# 在Canvas上绘制背景图片
     
-    white_box = tk.Label(form1, bg='white', width=20, height=18)# 添加白框
+    white_box = tk.Label(form1, bg='white', width=20, height=18)  # 设置固定宽度和高度
     white_box.place(relx=1.0, rely=0.0, x=-20, y=20, anchor='ne')
-    
+    white_box.pack_propagate(False)  # 禁止白框随内容自动调整大小
+
+    style = ttk.Style()  # 使用更美观的按钮样式
+    style.configure('TButton', font=('楷体', 12), foreground='black', background='lightgray', borderwidth=0)  # 修改字体为楷体，并去除边框
+
+    # 新增：自定义LabelFrame样式，设置背景为白色
+    style.configure('White.TLabelframe', background='white')
+    style.configure('White.TLabelframe.Label', background='white', font=('微软雅黑', 10))
+
+    # 在白色框上放置一个LabelFrame，并应用自定义样式
+    label_frame = ttk.LabelFrame(white_box, text="使用须知", padding=(10, 5), style='White.TLabelframe')
+    label_frame.place(relx=0.5, rely=0.43, anchor='center', width=130, height=260)  # 固定位置和大小
+
+    # 在LabelFrame内添加文字，并设置自动换行
+    info_label = tk.Label(label_frame, text="生成前请您先点击下方的高级设置按钮查看和修改设置。\n==========\n本程序基于算法生成的课表仅供参考，需根据实际情况调整。", 
+                      bg='white', font=('微软雅黑', 10), wraplength=100)  # 设置wraplength以实现自动换行
+    info_label.pack(pady=5)
+
     canvas.create_text(100, 50, text='欢迎', fill='black', font=('隶书', 32))# 在Canvas上绘制文字
     
     style = ttk.Style()# 使用更美观的按钮样式
     style.configure('TButton', font=('楷体', 12), foreground='black', background='lightgray', borderwidth=0)  # 修改字体为楷体，并去除边框
 
-    bottom_left_button = ttk.Button(form1, text='音乐开/关', command=on_bottom_left_button_click, style='TButton')
+    bottom_left_button = ttk.Button(form1, text='音乐开/关', command=print, style='TButton')
     bottom_left_button.place(relx=0.0, rely=1.0, x=20, y=-39, anchor='sw')  # 左下角定位
 
     # 添加生成按钮
