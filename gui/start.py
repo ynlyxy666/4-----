@@ -7,9 +7,16 @@ import tooltip
 import tkinter.ttk as ttk
 from gui.StartupMovie import run
 import tkinter.scrolledtext as st
-import os,sys
+import os,sys, ctypes
 from gui.CenterWindow import center_window as cw
+from pygame import mixer
 
+# 新增DPI强制缩放设置
+import ctypes
+try:
+    ctypes.windll.shcore.SetProcessDpiAwareness(2)
+except:
+    pass
 
 def gui():
     def get_path(relative_path):
@@ -70,14 +77,33 @@ def gui():
         form1.destroy()
         sys.exit()
 
+    def on_bottom_left_button_click():
+        #print(pause)
+        if pause:
+            mixer.music.unpause()
+            pause = False
+        else:
+            mixer.music.pause()
+            pause = True
+
     #run()
     
-    # 启用高DPI缩放支持
+    ## 启用高DPI缩放支持
     form1=tk.Tk()
-    #form1.call('tk', 'scaling', 2.0)  # 设置缩放因子，可以根据需要调整
+    dpi = form1.tk.call('tk', 'scaling')
+    dpi2 = 1/dpi  # '1i'表示1英寸
+    print("系统DPI:", dpi)
+    #SCALE_FACTOR = dpi / 128  # 计算缩放比例
+    form1.call('tk', 'scaling', dpi)  # 设置缩放因子，可以根据需要调整
     form1.title('课表生成')
     form1.resizable(False,False)
     cw(form1,640,360)
+    
+    mixer.init()
+    mixer.music.load("bgm.ogg")
+    mixer.music.play(-1)
+    mixer.music.set_volume(0.5)
+    pause = False
 
     bg_image_path = get_path('src/bg2.jpg') # 设置背景图片
     bg_image = Image.open(bg_image_path)
@@ -94,6 +120,9 @@ def gui():
     
     style = ttk.Style()# 使用更美观的按钮样式
     style.configure('TButton', font=('楷体', 12), foreground='black', background='lightgray', borderwidth=0)  # 修改字体为楷体，并去除边框
+
+    bottom_left_button = ttk.Button(form1, text='音乐开/关', command=on_bottom_left_button_click, style='TButton')
+    bottom_left_button.place(relx=0.0, rely=1.0, x=20, y=-39, anchor='sw')  # 左下角定位
 
     # 添加生成按钮
     generate_button = ttk.Button(form1, text='生成', command=lambda: print("生成按钮被点击"), style='TButton')  # 应用自定义样式

@@ -6,6 +6,13 @@ from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
 from PyQt5.QtGui import QFont, QMovie
 from PyQt5.QtWidgets import QMainWindow, QSplashScreen
  
+# 新增DPI强制缩放设置
+#import ctypes
+#try:
+#    ctypes.windll.shcore.SetProcessDpiAwareness(2)
+#except:
+#    pass
+
 def get_path(relative_path):
     try:
         base_path = sys._MEIPASS # pyinstaller打包后的路径
