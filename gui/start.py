@@ -83,7 +83,7 @@ def gui():
         form5=tk.Toplevel(form1)
         form5.title('高级设置')
         form5.resizable(False,False)
-        cw(form5,640,360)
+        cw(form5,400,300)
         AdvancedSettings(form5)
 
     def quit():

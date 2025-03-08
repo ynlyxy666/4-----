@@ -1,149 +1,87 @@
-from enum import Enum
-from typing import Dict, List, Optional
+import configparser
+from collections import defaultdict
 
-class ScheduleType(Enum):
-    WEEKLY = "weekly"     # 每周重复
-    SINGLE_WEEK = "odd"   # 单周
-    DOUBLE_WEEK = "even"  # 双周
+WEEKDAY_NAMES = ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日']
+WEEKDAY_MAP = {day.lower()[:3]: idx for idx, day in enumerate(WEEKDAY_NAMES)}
 
-class TimeConflictChecker:
-    """时间冲突检测器"""
-    
-    def check_time_conflict(self, courses: Dict[str, dict], new_course: dict):
-        """时间冲突检测"""
-        for existing_course in courses.values():
-            for new_time_slot in new_course["time"]:
-                for existing_time_slot in existing_course["time"]:
-                    if self._is_time_overlap(new_time_slot, existing_time_slot):
-                        raise ValueError(f"Time conflict detected between {new_course['id']} and {existing_course['id']}")
-    
-    def _is_time_overlap(self, time_slot1: str, time_slot2: str) -> bool:
-        """判断两个时间段是否有重叠"""
-        day1, time_range1 = time_slot1.split()
-        day2, time_range2 = time_slot2.split()
-        if day1 != day2:
-            return False
-        start1, end1 = time_range1.split('-')
-        start2, end2 = time_range2.split('-')
-        return not (end1 <= start2 or end2 <= start1)
+def parse_weekdays(weekdays_str):
+    """解析星期字符串为星期索引列表"""
+    return [WEEKDAY_MAP[day.strip().lower()[:3]] for day in weekdays_str.split(',')]
 
-class CourseManager:
-    """课程管理器"""
-    
-    def __init__(self):
-        self.courses: Dict[str, dict] = {}  # {course_id: course_info}
-        self.time_conflict_checker: TimeConflictChecker = None  # 初始化时间冲突检查器
-    
-    def add_course(self, 
-                  course_id: str,
-                  course_name: str,
-                  time_slots: List[str],
-                  locations: List[str],
-                  teachers: List[str],
-                  schedule_type: ScheduleType = ScheduleType.WEEKLY,
-                  time_conflict_checker: TimeConflictChecker = None):
-        """添加课程接口"""
-        if course_id in self.courses:
-            raise ValueError(f"Course ID {course_id} already exists")
-        
-        if time_conflict_checker:
-            self.time_conflict_checker = time_conflict_checker
-        
-        new_course = {
-            "id": course_id,
-            "name": course_name,
-            "time": time_slots,
-            "locations": locations,
-            "teachers": teachers,
-            "type": schedule_type
-        }
-        if self.time_conflict_checker:
-            self.time_conflict_checker.check_time_conflict(self.courses, new_course)
-        self.courses[course_id] = new_course
-    
-    def remove_course(self, course_id: str):
-        """删除课程接口"""
-        if course_id not in self.courses:
-            raise KeyError(f"Course {course_id} not found")
-        del self.courses[course_id]
-    
-    def get_course(self, course_id: str) -> Optional[dict]:
-        """课程查询接口"""
-        return self.courses.get(course_id)
+def generate_timetable(config_path):
+    """主函数：输入配置文件路径，返回课表字典"""
+    config = configparser.ConfigParser()
+    config.read(config_path)
 
-class CourseScheduler:
-    """课表生成器"""
+    # 初始化数据结构：班级 -> 星期 -> 节次 -> 科目
+    timetable = defaultdict(lambda: defaultdict(dict))
     
-    def __init__(self, course_manager: CourseManager):
-        self.course_manager = course_manager
-    
-    def generate_schedule(self, courses: List[dict], daily_limit: int, weekly_days: int) -> Dict[str, List[dict]]:
-        """生成课表接口"""
-        schedule = {day: [] for day in ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][:weekly_days]}
-        
-        for course in courses:
-            if self._should_include(course, 1):  # Assuming week_num is 1 for simplicity
-                for i, time_slot in enumerate(course["time"]):
-                    day = time_slot.split()[0]
-                    if len(schedule[day]) < daily_limit:
-                        schedule[day].append({
-                            "time": time_slot,
-                            "name": course["name"],
-                            "location": course["locations"][i % len(course["locations"])],
-                            "teacher": course["teachers"][i % len(course["teachers"])]
-                        })
-        
-        # 按时间排序
-        for day in schedule:
-            schedule[day].sort(key=lambda x: x["time"])
-        return schedule
-    
-    def _should_include(self, course: dict, week_num: int) -> bool:
-        """判断是否应包含当前周"""
-        if course["type"] == ScheduleType.WEEKLY:
-            return True
-        elif course["type"] == ScheduleType.SINGLE_WEEK:
-            return week_num % 2 == 1
-        elif course["type"] == ScheduleType.DOUBLE_WEEK:
-            return week_num % 2 == 0
-        return False
+    # 解析时间段配置（仅用于验证节次有效性）
+    time_slots = {int(k) for k in config['TimeSlots']} if 'TimeSlots' in config else set()
 
-# 预留扩展接口示例
-class ScheduleExporter:
-    """数据导出接口（示例）"""
-    @staticmethod
-    def export_to_json(schedule: dict):
-        """导出为JSON格式"""
-        pass
-    
-    @staticmethod
-    def export_to_excel(schedule: dict):
-        """导出为Excel格式"""
-        pass
+    # 处理所有课程配置
+    for section in config.sections():
+        if not section.startswith('Course:'):
+            continue
 
-# 示例扩展使用方法
+        try:
+            course = config[section]
+            # 解析多班级配置
+            classes = [c.strip() for c in course['class'].split(',')]
+            # 解析多教师配置（实际未使用，仅为兼容配置）
+            teachers = [t.strip() for t in course['teacher'].split(',')]
+            
+            # 处理班级-教师配对逻辑
+            if len(classes) != len(teachers):
+                if len(classes) == 1:
+                    classes = classes * len(teachers)
+                elif len(teachers) == 1:
+                    teachers = teachers * len(classes)
+                else:
+                    raise ValueError("班级与教师数量不匹配")
+
+            subject = course['subject']
+            weekdays = parse_weekdays(course['weekdays'])
+            start_slot = course.getint('start_slot')
+            duration = course.getint('duration', 1)
+            slots = range(start_slot, start_slot + duration)
+
+            # 验证时间段有效性
+            if not all(s in time_slots for s in slots):
+                invalid = [s for s in slots if s not in time_slots]
+                raise ValueError(f"无效时间段: {invalid}")
+
+            # 处理每个班级的排课
+            for cls in set(classes):  # 去重处理
+                for weekday in weekdays:
+                    weekday_name = WEEKDAY_NAMES[weekday]
+                    for slot in slots:
+                        # 冲突检测
+                        if slot in timetable[cls][weekday_name]:
+                            existing = timetable[cls][weekday_name][slot]
+                            raise ValueError(
+                                f"冲突：{cls}班 {weekday_name} 第{slot}节 "
+                                f"已有【{existing}】，无法安排【{subject}】"
+                            )
+                        timetable[cls][weekday_name][slot] = subject
+
+        except Exception as e:
+            print(f"配置项 {section} 错误: {str(e)}")
+            continue
+
+    # 转换为目标格式
+    result = {}
+    for cls in timetable:
+        result[cls] = {}
+        for weekday in timetable[cls]:
+            # 按节次顺序生成课程列表
+            sorted_slots = sorted(timetable[cls][weekday].items())
+            result[cls][weekday] = [subject for _, subject in sorted_slots]
+
+    return result
+
+# 使用示例
 if __name__ == "__main__":
-    time_conflict_checker = TimeConflictChecker()
-    course_manager = CourseManager()
-    scheduler = CourseScheduler(course_manager)
-    
-    # 添加课程
-    course_manager.add_course(
-        course_id="CS101",
-        course_name="Computer Science",
-        time_slots=["Mon 9:00-10:30", "Wed 14:00-15:30"],
-        locations=["Room 301"],
-        teachers=["Dr. Smith"],
-        schedule_type=ScheduleType.WEEKLY,
-        time_conflict_checker=time_conflict_checker
-    )
-    
-    # 获取课程列表
-    courses = list(course_manager.courses.values())
-    
-    # 生成课表
-    schedule = scheduler.generate_schedule(courses, daily_limit=3, weekly_days=5)
-    
-    # 导出使用
-    ScheduleExporter.export_to_json(schedule)
-#
+    config_path = "school.ini"
+    timetable = generate_timetable(config_path)
+    print(timetable)

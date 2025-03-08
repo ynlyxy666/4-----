@@ -7,11 +7,15 @@ class AdvancedSettings:
     def __init__(self, master):
         self.master = master
         master.title("课表生成高级设置 v2.0")
-        master.geometry("640x360")
+        master.geometry("400x300")
 
         # 创建主容器
         self.main_frame = ttk.Frame(master)
         self.main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        # 添加 Notebook 控件
+        self.notebook = ttk.Notebook(self.main_frame)
+        self.notebook.pack(fill=tk.BOTH, expand=True)
 
         # 基本设置区域
         self.create_basic_settings()
@@ -26,42 +30,42 @@ class AdvancedSettings:
         self.create_action_buttons()
 
     def create_basic_settings(self):
-        # 基本设置框架
-        frame = ttk.LabelFrame(self.main_frame, text="基本设置", padding=(10, 5))
-        frame.grid(row=0, column=0, columnspan=2, sticky="ew", pady=5)
+        # 创建基本设置的标签页
+        basic_frame = ttk.Frame(self.notebook)
+        self.notebook.add(basic_frame, text="基本设置")
 
         # 课程天数设置
-        ttk.Label(frame, text="课程天数:").grid(row=0, column=0, sticky=tk.W)
-        self.days_spin = ttk.Spinbox(frame, from_=1, to=7, width=5)
+        ttk.Label(basic_frame, text="课程天数:").grid(row=0, column=0, sticky=tk.W)
+        self.days_spin = ttk.Spinbox(basic_frame, from_=1, to=7, width=5)
         self.days_spin.set(5)
         self.days_spin.grid(row=0, column=1, sticky=tk.W, padx=5)
 
         # 每周循环周期
-        ttk.Label(frame, text="循环周期:").grid(row=0, column=2, sticky=tk.W, padx=10)
-        self.cycle_combo = ttk.Combobox(frame, values=["单周", "双周", "每周"], width=6)
+        ttk.Label(basic_frame, text="循环周期:").grid(row=0, column=2, sticky=tk.W, padx=10)
+        self.cycle_combo = ttk.Combobox(basic_frame, values=["单周", "双周", "每周"], width=6)
         self.cycle_combo.set("每周")
         self.cycle_combo.grid(row=0, column=3, sticky=tk.W)
 
         # 课程最大时长
-        ttk.Label(frame, text="最大课时长(分钟):").grid(row=1, column=0, sticky=tk.W)
-        self.max_duration = ttk.Entry(frame, width=8)
+        ttk.Label(basic_frame, text="最大课时长(分钟):").grid(row=1, column=0, sticky=tk.W)
+        self.max_duration = ttk.Entry(basic_frame, width=8)
         self.max_duration.insert(0, "45")
         self.max_duration.grid(row=1, column=1, sticky=tk.W, padx=5)
 
         # 休息间隔
-        ttk.Label(frame, text="最小休息间隔:").grid(row=1, column=2, sticky=tk.W, padx=10)
-        self.break_interval = ttk.Entry(frame, width=8)
+        ttk.Label(basic_frame, text="最小休息间隔:").grid(row=1, column=2, sticky=tk.W, padx=10)
+        self.break_interval = ttk.Entry(basic_frame, width=8)
         self.break_interval.insert(0, "10")
         self.break_interval.grid(row=1, column=3, sticky=tk.W)
 
     def create_time_rules(self):
-        # 时间规则框架
-        frame = ttk.LabelFrame(self.main_frame, text="时间规则", padding=(10, 5))
-        frame.grid(row=1, column=0, sticky="nsew", pady=5, padx=5)
+        # 创建时间规则的标签页
+        time_frame = ttk.Frame(self.notebook)
+        self.notebook.add(time_frame, text="时间规则")
 
         # 时间规则表格
         columns = ("day", "start", "end", "max_classes")
-        self.time_tree = ttk.Treeview(frame, columns=columns, show="headings", height=4)
+        self.time_tree = ttk.Treeview(time_frame, columns=columns, show="headings", height=4)
 
         # 设置列
         self.time_tree.heading("day", text="星期")
@@ -83,18 +87,18 @@ class AdvancedSettings:
             self.time_tree.insert("", tk.END, values=(day, "08:00", "17:00", 6))
 
         # 编辑按钮
-        btn_frame = ttk.Frame(frame)
+        btn_frame = ttk.Frame(time_frame)
         btn_frame.grid(row=1, column=0, pady=5)
         ttk.Button(btn_frame, text="编辑选中规则", command=self.edit_time_rule).pack(side=tk.LEFT, padx=2)
 
     def create_advanced_rules(self):
-        # 高级规则框架
-        frame = ttk.LabelFrame(self.main_frame, text="高级约束规则", padding=(10, 5))
-        frame.grid(row=1, column=1, sticky="nsew", pady=5, padx=5)
+        # 创建高级规则的标签页
+        advanced_frame = ttk.Frame(self.notebook)
+        self.notebook.add(advanced_frame, text="高级约束规则")
 
         # 规则类型选择
-        ttk.Label(frame, text="添加新规则:").grid(row=0, column=0, sticky=tk.W)
-        self.rule_type = ttk.Combobox(frame, values=[
+        ttk.Label(advanced_frame, text="添加新规则:").grid(row=0, column=0, sticky=tk.W)
+        self.rule_type = ttk.Combobox(advanced_frame, values=[
             "禁止时间安排",
             "课程间隔要求",
             "教师时间冲突避免",
@@ -103,14 +107,14 @@ class AdvancedSettings:
         self.rule_type.grid(row=0, column=1, padx=5)
 
         # 添加规则按钮
-        ttk.Button(frame, text="+ 添加", command=self.add_rule).grid(row=0, column=2)
+        ttk.Button(advanced_frame, text="+ 添加", command=self.add_rule).grid(row=0, column=2)
 
         # 规则列表
-        self.rules_list = tk.Listbox(frame, width=40, height=8)
+        self.rules_list = tk.Listbox(advanced_frame, width=40, height=8)
         self.rules_list.grid(row=1, column=0, columnspan=3, pady=5, sticky="ew")
 
         # 规则操作按钮
-        btn_frame = ttk.Frame(frame)
+        btn_frame = ttk.Frame(advanced_frame)
         btn_frame.grid(row=2, column=0, columnspan=3)
         ttk.Button(btn_frame, text="删除选中", command=self.delete_rule).pack(side=tk.LEFT, padx=2)
         ttk.Button(btn_frame, text="清除所有", command=self.clear_rules).pack(side=tk.LEFT, padx=2)
@@ -118,7 +122,7 @@ class AdvancedSettings:
     def create_action_buttons(self):
         # 操作按钮框架
         frame = ttk.Frame(self.main_frame)
-        frame.grid(row=2, column=0, columnspan=2, pady=10)
+        frame.pack()
 
         ttk.Button(frame, text="导出设置", command=self.export_settings).pack(side=tk.RIGHT, padx=5)
         ttk.Button(frame, text="生成课表", command=self.generate_timetable).pack(side=tk.RIGHT, padx=5)
