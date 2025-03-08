@@ -15,7 +15,7 @@ from multiprocessing import Process
 # 新增DPI强制缩放设置
 import ctypes
 try:
-    ctypes.windll.shcore.SetProcessDpiAwareness(1)
+    ctypes.windll.shcore.SetProcessDpiAwareness(2)
 except:
     pass
 
@@ -96,7 +96,8 @@ def gui():
 
     try:
         mixer.init()
-        mixer.music.load("bgm.ogg")
+        ms=get_path("src/bgm.ogg")
+        mixer.music.load(ms)
         mixer.music.play(-1)
         mixer.music.set_volume(0.5)
         print("音乐老师，走！")
@@ -111,7 +112,7 @@ def gui():
     dpi2 = 1/dpi  # '1i'表示1英寸
     print("系统DPI:", dpi)
     #SCALE_FACTOR = dpi / 128  # 计算缩放比例
-    form1.call('tk', 'scaling', dpi)  # 设置缩放因子，可以根据需要调整
+    form1.call('tk', 'scaling', 1.333333333)  # 设置缩放因子，可以根据需要调整
     form1.title('课表生成')
     form1.resizable(False,False)
     cw(form1,640,360)
