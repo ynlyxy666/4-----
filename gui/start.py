@@ -11,6 +11,7 @@ import os,sys, ctypes
 from gui.CenterWindow import center_window as cw
 from pygame import mixer
 from multiprocessing import Process
+from gui.advanced import AdvancedSettings
 
 # 新增DPI强制缩放设置
 import ctypes
@@ -83,6 +84,7 @@ def gui():
         form5.title('高级设置')
         form5.resizable(False,False)
         cw(form5,640,360)
+        AdvancedSettings(form5)
 
     def quit():
         form1.destroy()
