@@ -105,7 +105,16 @@ def gui():
         print("音乐老师，走！")
     except Exception as e:
         print("音乐走起失败")
-
+    pause=0
+    def pp():
+        nonlocal pause
+        if pause==0:
+            mixer.music.pause()
+            pause=1
+        else:
+            mixer.music.unpause()
+            pause=0
+    
     #stmv.join()
 
     ## 启用高DPI缩放支持
@@ -152,7 +161,7 @@ def gui():
     style = ttk.Style()# 使用更美观的按钮样式
     style.configure('TButton', font=('楷体', 12), foreground='black', background='lightgray', borderwidth=0)  # 修改字体为楷体，并去除边框
 
-    bottom_left_button = ttk.Button(form1, text='音乐开/关', command=print, style='TButton')
+    bottom_left_button = ttk.Button(form1, text='音乐', command=pp, style='TButton')
     bottom_left_button.place(relx=0.0, rely=1.0, x=20, y=-39, anchor='sw')  # 左下角定位
 
     # 添加生成按钮
