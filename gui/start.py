@@ -94,14 +94,14 @@ def gui():
     #run()
 
     stmv = Process(target=run)
-    #stmv.start()
+    stmv.start()
 
     try:
         mixer.init()
         ms=get_path("src/bgm.ogg")
         mixer.music.load(ms)
         mixer.music.play(-1)
-        mixer.music.set_volume(0.5)
+        mixer.music.set_volume(0.25)
         print("音乐老师，走！")
     except Exception as e:
         print("音乐走起失败")
@@ -115,7 +115,7 @@ def gui():
             mixer.music.unpause()
             pause=0
     
-    #stmv.join()
+    stmv.join()
 
     ## 启用高DPI缩放支持
     form1=tk.Tk()

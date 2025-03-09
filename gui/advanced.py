@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import json
 from tkinter import messagebox
 from datetime import datetime, timedelta
 from gui.CenterWindow import center_window as cw
@@ -131,8 +132,8 @@ class AdvancedSettings:
         frame = ttk.Frame(self.main_frame)
         frame.pack()
 
-        ttk.Button(frame, text="导出设置", command=lambda: [self.export_settings(), self.master.master.scheduler.save_settings()]).pack(side=tk.RIGHT, padx=5)
-        ttk.Button(frame, text="生成课表", command=self.generate_timetable).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(frame, text="确定", command=self.export_settings).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(frame, text="取消", command=self.master.destroy).pack(side=tk.RIGHT, padx=5)
         ttk.Button(frame, text="恢复默认", command=self.reset_defaults).pack(side=tk.RIGHT, padx=5)
 
     def edit_time_rule(self):
@@ -201,6 +202,7 @@ class AdvancedSettings:
         def save_changes():
             new_values = (
                 day_combo.get(),
+                have_class.get(),  # 保留原数据字段
                 start_entry.get(),
                 end_entry.get(),
                 max_classes.get()
@@ -365,12 +367,26 @@ class AdvancedSettings:
         self.rules_list.delete(0, tk.END)
 
     def export_settings(self):
-        # 导出设置逻辑
-        messagebox.showinfo("提示", "导出设置功能待实现")
+        data = {
+            "basic": {
+                "days": self.days_spin.get(),
+                "cycle": self.cycle_combo.get(),
+                "max_duration": self.max_duration.get(),
+                "break_interval": self.break_interval.get()
+            },
+            "time_rules": [self.time_tree.item(item, 'values') for item in self.time_tree.get_children()],
+            "advanced_rules": list(self.rules_list.get(0, tk.END))
+        }
+        
+        file_path = "settings.json"
+        if file_path:
+            with open(file_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+        self.master.destroy()
 
     def generate_timetable(self):
         # 生成课表逻辑
-        messagebox.showinfo("提示", "生成课表功能待实现")
+        self.master.destroy()
 
     def reset_defaults(self):
         # 重置默认设置
