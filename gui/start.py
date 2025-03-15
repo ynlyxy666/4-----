@@ -10,7 +10,7 @@ import tkinter.scrolledtext as st
 import os,sys, ctypes
 from gui.CenterWindow import center_window as cw
 from pygame import mixer
-from multiprocessing import Process
+from multiprocessing import Process , freeze_support
 from gui.advanced import AdvancedSettings
 
 # 新增DPI强制缩放设置
@@ -80,11 +80,7 @@ def gui():
         cw(form4,640,360)
 
     def advanced():
-        form5=tk.Toplevel(form1)
-        form5.title('高级设置')
-        form5.resizable(False,False)
-        cw(form5,400,300)
-        AdvancedSettings(form5)
+        AdvancedSettings(form1)
 
     def quit():
         form1.destroy()
@@ -93,6 +89,7 @@ def gui():
 
     #run()
 
+    freeze_support()
     stmv = Process(target=run)
     stmv.start()
 
@@ -123,7 +120,7 @@ def gui():
     dpi2 = 1/dpi  # '1i'表示1英寸
     print("系统DPI:", dpi)
     #SCALE_FACTOR = dpi / 128  # 计算缩放比例
-    form1.call('tk', 'scaling', 1.333333333)  # 设置缩放因子，可以根据需要调整
+    form1.call('tk', 'scaling', 1.3333333333333)  # 设置缩放因子，可以根据需要调整
     form1.title('课表生成')
     form1.resizable(False,False)
     cw(form1,640,360)

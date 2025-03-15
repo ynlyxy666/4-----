@@ -2,7 +2,7 @@ import shutil
 import os
 
 # 假设这是你现有的代码
-os.system('pyinstaller --onefile --console --add-data "src/gif.gif;src/" --add-data "src/bgm.ogg;src/" --add-data "src/bg2.jpg;src/" --add-data "src/ico/advanced.png;src/ico/" main.pyw')
+os.system('pyinstaller --onefile -i main.ico --add-data "src/gif.gif;src/" --add-data "src/bgm.ogg;src/" --add-data "src/bg2.jpg;src/" --add-data "src/ico/advanced.png;src/ico/" main.pyw')
 os.remove('main.spec')
 
 # 补写的代码：删除 build 文件夹
