@@ -2,7 +2,15 @@ import json
 import random
 from datetime import datetime, timedelta
 from collections import defaultdict
-import openpyxl
+import os , sys
+
+def get_path(relative_path):
+        try:
+            base_path = sys._MEIPASS # pyinstaller打包后的路径
+        except AttributeError:
+            base_path = os.path.abspath(".") # 当前工作目录的路径
+
+        return os.path.normpath(os.path.join(base_path, relative_path))
 
 class GradeTimetableGenerator:
     def __init__(self):
@@ -22,12 +30,13 @@ class GradeTimetableGenerator:
         self.class_count = int(self.settings['basic'].get('class_count', 6))
         self.days = int(self.settings['basic']['days'])
         self.max_duration = int(self.settings['basic']['max_duration'])
+        self.daily_periods = int(self.settings['basic'].get('daily_periods', 8))
         
         # 解析时间规则
-        self.time_rules = self.parse_time_rules()  # 新增关键代码
+        self.time_rules = self.parse_time_rules()
         
-        # 解析科目配置
-        self.subjects = []
+        # 新增科目配置初始化
+        self.subjects = []  # 添加这行初始化代码
         for item in self.settings['subjects']:
             if isinstance(item, dict):
                 self.subjects.append({
@@ -36,7 +45,7 @@ class GradeTimetableGenerator:
                 })
             else:
                 self.subjects.append({'name': item, 'teachers': 0})
-    
+
     def parse_time_rules(self):
         """解析时间规则"""
         day_map = {"周一":0, "周二":1, "周三":2, "周四":3, "周五":4, "周六":5, "周日":6}
@@ -45,16 +54,15 @@ class GradeTimetableGenerator:
             if rule[1] == "有":
                 day = day_map[rule[0]]
                 start = datetime.strptime(rule[2], "%H:%M")
-                end = datetime.strptime(rule[3], "%H:%M")
-                delta = (end - start).seconds // 60
-                num_slots = delta // self.max_duration
+                # 使用配置的每日课程数代替自动计算
+                num_slots = self.daily_periods  # 修改这里
                 rules[day] = {
                     "start": start,
                     "slots": [start + timedelta(minutes=i*self.max_duration) 
                              for i in range(num_slots)]
                 }
         return rules
-    
+
     def init_time_slots(self):
         """初始化时间槽"""
         self.time_slots = {}
@@ -188,16 +196,22 @@ class GradeTimetableGenerator:
             return random.random() > main_ratio
         else:
             return True
-
-    def export_to_excel(self, timetable, filename="grade_timetable.xlsx"):
+    
+    def export_to_excel(self, timetable):
         """增强版Excel导出方法"""
         import os
         from openpyxl import load_workbook
         from openpyxl.styles import Alignment
 
+        infilenamet = "c" + str(self.daily_periods) + ".xlsx"
+        infilename = get_path("src/tps/" + infilenamet)
+        print(infilename)
+        outfilename = "生成结果" + datetime.now().strftime("%Y%m%d%H%M%S") + ".xlsx"
+        print(outfilename)
+
         try:
             # 验证模板路径
-            template_path = os.path.join("src/tps", "c12.xlsx")
+            template_path = infilename
             if not os.path.exists(template_path):
                 raise FileNotFoundError(f"模板文件不存在于：{os.path.abspath(template_path)}")
 
@@ -243,26 +257,18 @@ class GradeTimetableGenerator:
 
             # 删除模板页并保存
             wb.remove(template_ws)
-            wb.save(filename)
-            print(f"成功生成：{os.path.abspath(filename)}")
+            wb.save(outfilename)
+            print(f"成功生成：{os.path.abspath(outfilename)}")
             return True
 
         except Exception as e:
             print(f"生成失败：{str(e)}")
             return False
         
-        
-if __name__ == "__main__":
+def make():
     generator = GradeTimetableGenerator()
     grade_timetable = generator.generate_grade()
-    
-    # 打印示例
-    for class_name, timetable in grade_timetable.items():
-        #print(f"\n{class_name}")
-        for day in timetable.values():
-            #print(f"\n{day['day']}")
-            for course in day["courses"]:
-                #print(f"{course['time']} - {course['course']}")
-                pass
-    
-    generator.export_to_excel(grade_timetable, "grade_timetable.xlsx")
+    generator.export_to_excel(grade_timetable)
+
+if __name__ == "__main__":
+    make()

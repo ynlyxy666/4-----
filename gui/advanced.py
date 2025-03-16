@@ -74,24 +74,26 @@ class AdvancedSettings:
         # 每天课节数（添加校验）
         ttk.Label(basic_frame, text="每天课节数:").grid(row=0, column=0, pady=5)
         self.periods_spin = ttk.Spinbox(basic_frame, from_=4, to=12, width=5, validate="focusout", 
-            validatecommand=(basic_frame.register(self.validate_periods), '%P'))  # 已修正
+        validatecommand=(basic_frame.register(self.validate_periods), '%P'))  # 输入验证
+        self.periods_spin.set(8)  # 设置默认值
+        #self.periods_spin.grid(row=0, column=1)
         self.periods_spin.grid(row=0, column=1, padx=5, sticky=tk.W)
 
         # 课程天数（添加校验）
-        ttk.Label(basic_frame, text="课程天数:").grid(row=1, column=0, pady=5)
+        ttk.Label(basic_frame, text="课程天数:").grid(row=0, column=2, pady=5)
         self.days_spin = ttk.Spinbox(basic_frame,from_=1,to=7,width=5,validate="focusout",
             validatecommand=(basic_frame.register(self.validate_days), '%P'))
-        self.days_spin.grid(row=1, column=1, padx=5, sticky=tk.W)
+        self.days_spin.grid(row=0, column=3, padx=5, sticky=tk.W)
 
         # 最大课时长（添加校验）
-        ttk.Label(basic_frame, text="最大课时长:").grid(row=1, column=2, pady=5)
+        ttk.Label(basic_frame, text="最大课时长:").grid(row=1, column=0, pady=5)
         self.max_duration = ttk.Entry(basic_frame, width=8,validate="focusout",
             validatecommand=(basic_frame.register(self.validate_duration), '%P'))
         self.max_duration.insert(0, "45")
-        self.max_duration.grid(row=1, column=3, padx=5, sticky=tk.W)
+        self.max_duration.grid(row=1, column=1, padx=5, sticky=tk.W)
         
         # 休息间隔（添加校验）
-        ttk.Label(basic_frame, text="休息间隔:").grid(row=3, column=0, pady=5)
+        ttk.Label(basic_frame, text="休息间隔:").grid(row=1, column=2, pady=5)
         self.break_interval = ttk.Entry(
             basic_frame, 
             width=8,
@@ -99,10 +101,10 @@ class AdvancedSettings:
             validatecommand=(basic_frame.register(self.validate_break), '%P')
         )
         self.break_interval.insert(0, "10")
-        self.break_interval.grid(row=3, column=1, padx=5, sticky=tk.W)
+        self.break_interval.grid(row=1, column=3, padx=5, sticky=tk.W)
         
         # 年级输入（添加校验）
-        ttk.Label(basic_frame, text="年级:").grid(row=4, column=0, pady=5)
+        ttk.Label(basic_frame, text="年级:").grid(row=2, column=0, pady=5)
         self.grade_entry = ttk.Entry(
             basic_frame, 
             width=5,
@@ -110,10 +112,10 @@ class AdvancedSettings:
             validatecommand=(basic_frame.register(self.validate_grade), '%P')
         )
         self.grade_entry.insert(0, "三")
-        self.grade_entry.grid(row=4, column=1, padx=5, sticky=tk.W)
+        self.grade_entry.grid(row=2, column=1, padx=5, sticky=tk.W)
         
         # 班级数量（添加校验）
-        ttk.Label(basic_frame, text="班级数量:").grid(row=5, column=0, pady=5)
+        ttk.Label(basic_frame, text="班级数量:").grid(row=2, column=2, pady=5)
         self.class_count = ttk.Spinbox(
             basic_frame, 
             from_=1, 
@@ -122,15 +124,14 @@ class AdvancedSettings:
             validate="focusout",
             validatecommand=(basic_frame.register(self.validate_class_count), '%P')
         )
-        self.periods_spin.set(8)
-        self.periods_spin.grid(row=5, column=1, padx=5, sticky=tk.W)
+        self.class_count.grid(row=2, column=3, padx=5, sticky=tk.W)
         # 新增每天课节数设置 ▲
 
         # 循环周期（添加缺失的控件定义）
-        ttk.Label(basic_frame, text="循环周期:").grid(row=6, column=0, padx=10)
+        ttk.Label(basic_frame, text="循环周期:").grid(row=3, column=0, padx=10)
         self.cycle_combo = ttk.Combobox(basic_frame, values=["单周", "双周", "每周"], width=6, validate="focusout", validatecommand=(basic_frame.register(self.validate_cycle), '%P'))
         self.cycle_combo.set("每周")
-        self.cycle_combo.grid(row=6, column=1)
+        self.cycle_combo.grid(row=3, column=1)
 
     def validate_days(self, value):
         try:
@@ -192,18 +193,17 @@ class AdvancedSettings:
         self.cycle_combo.set("每周")
         return False
 
-    # 已存在的 validate_class_count 方法需要补充重置逻辑
     def validate_class_count(self, value):
         try:
             num = int(value)
             if 1 <= num <= 20:
                 return True
             messagebox.showerror("输入错误", "班级数量范围1-20")
-            self.class_count.set(6)  # 添加重置逻辑
+            self.class_count.set(6)  # 强制重置为默认值
             return False
         except ValueError:
             messagebox.showerror("输入错误", "请输入有效数字")
-            self.class_count.set(6)  # 添加重置逻辑
+            self.class_count.set(6)  # 强制重置为默认值
             return False
 
     def validate_periods(self, value):

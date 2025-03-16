@@ -1,8 +1,10 @@
 import shutil
 import os
 
+code = 'pyinstaller -F -w -i main.ico --add-data "src/gif.gif;src/" --add-data "src/bgm.ogg;src/" --add-data "src/bg2.jpg;src/" --add-data "src/ico/advanced.png;src/ico/" --add-data "src/tps/c4.xlsx;src/tps" --add-data "src/tps/c5.xlsx;src/tps" --add-data "src/tps/c6.xlsx;src/tps" --add-data "src/tps/c7.xlsx;src/tps" --add-data "src/tps/c8.xlsx;src/tps" --add-data "src/tps/c9.xlsx;src/tps" --add-data "src/tps/c10.xlsx;src/tps" --add-data "src/tps/c11.xlsx;src/tps" --add-data "src/tps/c12.xlsx;src/tps" main.pyw'
+
 # 假设这是你现有的代码
-os.system('pyinstaller --onefile -i main.ico --add-data "src/gif.gif;src/" --add-data "src/bgm.ogg;src/" --add-data "src/bg2.jpg;src/" --add-data "src/ico/advanced.png;src/ico/" main.pyw')
+os.system(code)
 os.remove('main.spec')
 
 # 补写的代码：删除 build 文件夹

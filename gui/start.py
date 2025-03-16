@@ -5,9 +5,12 @@ from PIL import Image, ImageTk
 import gui.info as info
 import tooltip, threading
 import tkinter.ttk as ttk
+from lib.scheduler import make
 from gui.StartupMovie import run
+from tkinter import messagebox
 import tkinter.scrolledtext as st
 import os,sys, ctypes
+from lib.MakeNew import MakeNewJson
 from gui.CenterWindow import center_window as cw
 from pygame import mixer
 from multiprocessing import Process , freeze_support
@@ -79,6 +82,10 @@ def gui():
         form4.resizable(False,False)
         cw(form4,640,360)
 
+    def msc():
+        make()
+        messagebox.showinfo(title='生成成功',message=info.success)
+
     def advanced():
         AdvancedSettings(form1)
 
@@ -91,13 +98,15 @@ def gui():
 
     freeze_support()
     stmv = Process(target=run)
-    #stmv.start()
+    stmv.start()
+    mnj = Process(target=MakeNewJson)
+    mnj.start()
 
     try:
         mixer.init()
         ms=get_path("src/bgm.ogg")
         mixer.music.load(ms)
-    #    mixer.music.play(-1)
+        mixer.music.play(-1)
         mixer.music.set_volume(0.25)
         print("音乐老师，走！")
     except Exception as e:
@@ -112,7 +121,8 @@ def gui():
             mixer.music.unpause()
             pause=0
     
-    #stmv.join()
+    stmv.join()
+    mnj.join()
 
     ## 启用高DPI缩放支持
     form1=tk.Tk()
@@ -162,7 +172,7 @@ def gui():
     bottom_left_button.place(relx=0.0, rely=1.0, x=20, y=-39, anchor='sw')  # 左下角定位
 
     # 添加生成按钮
-    generate_button = ttk.Button(form1, text='生成', command=lambda: print("生成按钮被点击"), style='TButton')  # 应用自定义样式
+    generate_button = ttk.Button(form1, text='生成', command=msc, style='TButton')  # 应用自定义样式
     generate_button.place(relx=1.0, rely=1.0, x=-30, y=-39, anchor='se')  # 调整x和y值以控制按钮的位置
 
     # 添加高级设置按钮

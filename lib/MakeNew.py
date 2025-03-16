@@ -1,4 +1,4 @@
-{
+text='''{
   "basic": {
     "days": "5",
     "cycle": "每周",
@@ -117,4 +117,10 @@
       "teachers": 2
     }
   ]
-}
+}'''
+def MakeNewJson():
+    try:
+        open("settings.json")
+    except:
+        with open("settings.json",'w',encoding='utf8') as f:
+            f.write(text)
