@@ -13,7 +13,7 @@ class AdvancedSettings:
         self.top.grab_set()
         self.master = self.top
         self.top.title("课表生成高级设置 v3.0")
-        cw(self.top, 400, 320)
+        cw(self.top, 400, 340)
         self.top.resizable(False, False)
 
         self.main_frame = ttk.Frame(self.top)
@@ -23,48 +23,201 @@ class AdvancedSettings:
         self.notebook.pack(fill=tk.BOTH, expand=True)
 
         self.create_basic_settings()
-        self.create_time_rules()
-        self.create_advanced_rules()
+        self.create_time_rules()  # 删除这一行
         self.create_action_buttons()
         self.create_subject_management()
+        self.load_settings()
+
+    def load_settings(self):
+        """加载保存的设置"""
+        try:
+            with open("settings.json", 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                
+            # 加载基本设置
+            basic = data.get('basic', {})
+            self.days_spin.set(basic.get('days', 5))
+            self.cycle_combo.set(basic.get('cycle', '每周'))
+            self.max_duration.delete(0, tk.END)
+            self.max_duration.insert(0, basic.get('max_duration', '45'))
+            self.break_interval.delete(0, tk.END)
+            self.break_interval.insert(0, basic.get('break_interval', '10'))
+            self.periods_spin.set(basic.get('daily_periods', 8))  # 新增的每天课节数
+            self.class_count.set(basic.get('class_count', 6))
+            self.grade_entry.delete(0, tk.END)
+            self.grade_entry.insert(0, basic.get('grade', '三'))
+
+            # 加载时间规则
+            for item in self.time_tree.get_children():
+                self.time_tree.delete(item)
+            for rule in data.get('time_rules', []):
+                self.time_tree.insert("", tk.END, values=rule)
+
+            # 加载科目数据
+            for item in self.subject_tree.get_children():
+                self.subject_tree.delete(item)
+            for subject in data.get('subjects', []):
+                if isinstance(subject, dict):
+                    self.subject_tree.insert("", tk.END, values=(subject['name'], subject['teachers']))
+                else:
+                    self.subject_tree.insert("", tk.END, values=(subject, 0))
+
+        except FileNotFoundError:
+            pass  # 首次运行时没有设置文件是正常的
+        except Exception as e:
+            messagebox.showerror("加载错误", f"无法加载设置:\n{str(e)}")
 
     def create_basic_settings(self):
         basic_frame = ttk.Frame(self.notebook)
         self.notebook.add(basic_frame, text="基本设置")
 
-        # 课程天数
-        ttk.Label(basic_frame, text="课程天数:").grid(row=0, column=0, sticky=tk.W)
-        self.days_spin = ttk.Spinbox(basic_frame, from_=1, to=7, width=5)
-        self.days_spin.set(5)
-        self.days_spin.grid(row=0, column=1, sticky=tk.W, padx=5)
+        # 每天课节数（添加校验）
+        ttk.Label(basic_frame, text="每天课节数:").grid(row=0, column=0, pady=5)
+        self.periods_spin = ttk.Spinbox(basic_frame, from_=4, to=12, width=5, validate="focusout", 
+            validatecommand=(basic_frame.register(self.validate_periods), '%P'))  # 已修正
+        self.periods_spin.grid(row=0, column=1, padx=5, sticky=tk.W)
 
-        # 循环周期
-        ttk.Label(basic_frame, text="循环周期:").grid(row=0, column=2, padx=10)
-        self.cycle_combo = ttk.Combobox(basic_frame, values=["单周", "双周", "每周"], width=6)
-        self.cycle_combo.set("每周")
-        self.cycle_combo.grid(row=0, column=3)
+        # 课程天数（添加校验）
+        ttk.Label(basic_frame, text="课程天数:").grid(row=1, column=0, pady=5)
+        self.days_spin = ttk.Spinbox(basic_frame,from_=1,to=7,width=5,validate="focusout",
+            validatecommand=(basic_frame.register(self.validate_days), '%P'))
+        self.days_spin.grid(row=1, column=1, padx=5, sticky=tk.W)
 
-        # 课时参数
-        ttk.Label(basic_frame, text="最大课时长:").grid(row=1, column=0, sticky=tk.W)
-        self.max_duration = ttk.Entry(basic_frame, width=8)
+        # 最大课时长（添加校验）
+        ttk.Label(basic_frame, text="最大课时长:").grid(row=1, column=2, pady=5)
+        self.max_duration = ttk.Entry(basic_frame, width=8,validate="focusout",
+            validatecommand=(basic_frame.register(self.validate_duration), '%P'))
         self.max_duration.insert(0, "45")
-        self.max_duration.grid(row=1, column=1, padx=5)
-
-        ttk.Label(basic_frame, text="休息间隔:").grid(row=1, column=2, padx=10)
-        self.break_interval = ttk.Entry(basic_frame, width=8)
+        self.max_duration.grid(row=1, column=3, padx=5, sticky=tk.W)
+        
+        # 休息间隔（添加校验）
+        ttk.Label(basic_frame, text="休息间隔:").grid(row=3, column=0, pady=5)
+        self.break_interval = ttk.Entry(
+            basic_frame, 
+            width=8,
+            validate="focusout",
+            validatecommand=(basic_frame.register(self.validate_break), '%P')
+        )
         self.break_interval.insert(0, "10")
-        self.break_interval.grid(row=1, column=3)
-
-        # 年级班级设置
-        ttk.Label(basic_frame, text="年级:").grid(row=2, column=0, pady=5)
-        self.grade_entry = ttk.Entry(basic_frame, width=5)
+        self.break_interval.grid(row=3, column=1, padx=5, sticky=tk.W)
+        
+        # 年级输入（添加校验）
+        ttk.Label(basic_frame, text="年级:").grid(row=4, column=0, pady=5)
+        self.grade_entry = ttk.Entry(
+            basic_frame, 
+            width=5,
+            validate="focusout",
+            validatecommand=(basic_frame.register(self.validate_grade), '%P')
+        )
         self.grade_entry.insert(0, "三")
-        self.grade_entry.grid(row=2, column=1)
+        self.grade_entry.grid(row=4, column=1, padx=5, sticky=tk.W)
+        
+        # 班级数量（添加校验）
+        ttk.Label(basic_frame, text="班级数量:").grid(row=5, column=0, pady=5)
+        self.class_count = ttk.Spinbox(
+            basic_frame, 
+            from_=1, 
+            to=20, 
+            width=5,
+            validate="focusout",
+            validatecommand=(basic_frame.register(self.validate_class_count), '%P')
+        )
+        self.periods_spin.set(8)
+        self.periods_spin.grid(row=5, column=1, padx=5, sticky=tk.W)
+        # 新增每天课节数设置 ▲
 
-        ttk.Label(basic_frame, text="班级数量:").grid(row=2, column=2, padx=10)
-        self.class_count = ttk.Spinbox(basic_frame, from_=1, to=20, width=5)
-        self.class_count.set(6)
-        self.class_count.grid(row=2, column=3)
+        # 循环周期（添加缺失的控件定义）
+        ttk.Label(basic_frame, text="循环周期:").grid(row=6, column=0, padx=10)
+        self.cycle_combo = ttk.Combobox(basic_frame, values=["单周", "双周", "每周"], width=6, validate="focusout", validatecommand=(basic_frame.register(self.validate_cycle), '%P'))
+        self.cycle_combo.set("每周")
+        self.cycle_combo.grid(row=6, column=1)
+
+    def validate_days(self, value):
+        try:
+            num = int(value)
+            if 1 <= num <= 7:
+                return True
+            messagebox.showerror("输入错误", "课程天数范围1-7")
+            self.days_spin.set(5)
+            return False
+        except ValueError:
+            messagebox.showerror("输入错误", "请输入有效数字")
+            self.days_spin.set(5)
+            return False
+
+    def validate_duration(self, value):
+        try:
+            num = int(value)
+            if 20 <= num <= 120:
+                return True
+            messagebox.showerror("输入错误", "课时长范围20-120分钟")
+            self.max_duration.delete(0, tk.END)
+            self.max_duration.insert(0, "45")
+            return False
+        except ValueError:
+            messagebox.showerror("输入错误", "请输入有效数字")
+            self.max_duration.delete(0, tk.END)
+            self.max_duration.insert(0, "45")
+            return False
+
+    def validate_break(self, value):
+        try:
+            num = int(value)
+            if 5 <= num <= 60:
+                return True
+            messagebox.showerror("输入错误", "休息间隔范围5-60分钟")
+            self.break_interval.delete(0, tk.END)
+            self.break_interval.insert(0, "10")
+            return False
+        except ValueError:
+            messagebox.showerror("输入错误", "请输入有效数字")
+            self.break_interval.delete(0, tk.END)
+            self.break_interval.insert(0, "10")
+            return False
+
+    def validate_grade(self, value):
+        valid_grades = ['一', '二', '三', '四', '五', '六', '七', '八', '九']
+        if value in valid_grades:
+            return True
+        messagebox.showerror("输入错误", "请输入有效年级（一至九年级）")
+        self.grade_entry.delete(0, tk.END)
+        self.grade_entry.insert(0, "三")
+        return False
+
+    def validate_cycle(self, value):
+        valid_cycles = ["单周", "双周", "每周"]
+        if value in valid_cycles:
+            return True
+        messagebox.showerror("输入错误", "请选择有效的循环周期（单周/双周/每周）")
+        self.cycle_combo.set("每周")
+        return False
+
+    # 已存在的 validate_class_count 方法需要补充重置逻辑
+    def validate_class_count(self, value):
+        try:
+            num = int(value)
+            if 1 <= num <= 20:
+                return True
+            messagebox.showerror("输入错误", "班级数量范围1-20")
+            self.class_count.set(6)  # 添加重置逻辑
+            return False
+        except ValueError:
+            messagebox.showerror("输入错误", "请输入有效数字")
+            self.class_count.set(6)  # 添加重置逻辑
+            return False
+
+    def validate_periods(self, value):
+        try:
+            num = int(value)
+            if 4 <= num <= 12:
+                return True
+            messagebox.showerror("输入错误", "课节数范围必须在4-12之间")
+            self.periods_spin.set(8)
+            return False
+        except ValueError:
+            messagebox.showerror("输入错误", "请输入有效的数字")
+            self.periods_spin.set(8)
+            return False
 
     def create_subject_management(self):
         frame = ttk.Frame(self.notebook)
@@ -76,11 +229,16 @@ class AdvancedSettings:
             frame,
             columns=columns,
             show="headings",
-            height=10
+            height=10,
+            selectmode="browse"  # 新增选择模式限制
         )
+        # 配置列时添加不可拉伸设置
+        self.subject_tree.column("subject", width=273, stretch=False)
+        self.subject_tree.column("teachers", width=100, stretch=False)
+
         self.subject_tree.heading("subject", text="科目名称")
         self.subject_tree.heading("teachers", text="教师人数")
-        self.subject_tree.column("subject", width=150)
+        self.subject_tree.column("subject", width=273)
         self.subject_tree.column("teachers", width=100)
 
         # 示例数据
@@ -106,7 +264,6 @@ class AdvancedSettings:
         btn_frame.grid(row=1, column=0, pady=5)
         ttk.Button(btn_frame, text="添加", command=self.add_subject).pack(side=tk.LEFT, padx=5)
         ttk.Button(btn_frame, text="删除", command=self.del_subject).pack(side=tk.LEFT, padx=5)
-
 
     def create_time_rules(self):
         # 创建时间规则的标签页
@@ -148,33 +305,6 @@ class AdvancedSettings:
         btn_frame.grid(row=1, column=0, pady=5)
         ttk.Button(btn_frame, text="编辑选中规则", command=self.edit_time_rule).pack(side=tk.LEFT, padx=2)
 
-    def create_advanced_rules(self):
-        # 创建高级规则的标签页
-        advanced_frame = ttk.Frame(self.notebook)
-        self.notebook.add(advanced_frame, text="高级约束规则")
-
-        # 规则类型选择
-        ttk.Label(advanced_frame, text="添加新规则:").grid(row=0, column=0, sticky=tk.W)
-        self.rule_type = ttk.Combobox(advanced_frame, values=[
-            "禁止时间安排",
-            "教师时间冲突避免",
-            "教室分配限制"
-        ], width=20)
-        self.rule_type.grid(row=0, column=1, padx=5)
-
-        # 添加规则按钮
-        ttk.Button(advanced_frame, text="+ 添加", command=self.add_rule).grid(row=0, column=2)
-
-        # 规则列表
-        self.rules_list = tk.Listbox(advanced_frame, width=40, height=8)
-        self.rules_list.grid(row=1, column=0, columnspan=3, pady=5, sticky="ew")
-
-        # 规则操作按钮
-        btn_frame = ttk.Frame(advanced_frame)
-        btn_frame.grid(row=2, column=0, columnspan=3)
-        ttk.Button(btn_frame, text="删除选中", command=self.delete_rule).pack(side=tk.LEFT, padx=2)
-        ttk.Button(btn_frame, text="清除所有", command=self.clear_rules).pack(side=tk.LEFT, padx=2)
-
     def create_action_buttons(self):
         # 操作按钮框架
         frame = ttk.Frame(self.main_frame)
@@ -193,7 +323,7 @@ class AdvancedSettings:
         list_frame = ttk.Frame(custom_frame)
         list_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         self.subject_var = tk.StringVar()
-        self.custom_list = tk.Listbox(list_frame, width=49, height=10, listvariable=self.subject_var)
+        self.custom_list = ttk.Listbox(list_frame, width=49, height=10, listvariable=self.subject_var)
         
         # 初始化预设科目
         for subject in ["道德与法治","语文","数学",'英语','日语','俄语','历史','地理','科学','物理','化学','生物学','信息科技','体育与健康','艺术','劳动','综合实践活动']:
@@ -213,6 +343,17 @@ class AdvancedSettings:
         ttk.Button(btn_frame, text="添加课程", command=self.add_subject).pack(side=tk.LEFT, padx=5)
         ttk.Button(btn_frame, text="删除课程", command=self.del_subject).pack(side=tk.LEFT, padx=5)
 
+    def validate_teacher_count(self, value):
+        try:
+            num = int(value)
+            if 0 <= num <= 20:
+                return True
+            messagebox.showerror("输入错误", "教师人数范围0-20")
+            return False
+        except ValueError:
+            messagebox.showerror("输入错误", "请输入有效数字")
+            return False
+
     def add_subject(self):
         win = tk.Toplevel(self.master)
         win.title("添加科目")
@@ -224,10 +365,17 @@ class AdvancedSettings:
         subject_entry.grid(row=0, column=1)
 
         ttk.Label(win, text="教师人数:").grid(row=1, column=0)
-        teacher_spin = ttk.Spinbox(win, from_=0, to=20, width=5)
+        teacher_spin = ttk.Spinbox(
+            win, 
+            from_=0, 
+            to=20, 
+            width=5,
+            validate="focusout",
+            validatecommand=(win.register(self.validate_teacher_count), '%P')
+        )
         teacher_spin.set(0)
         teacher_spin.grid(row=1, column=1)
-
+        
         def save_subject():
             subject = subject_entry.get().strip()
             teachers = teacher_spin.get()
@@ -288,13 +436,20 @@ class AdvancedSettings:
         
         # 开始时间（先创建控件）
         ttk.Label(edit_win, text="开始时间:").grid(row=2, column=0)
-        start_entry = ttk.Entry(edit_win)
+        start_entry = ttk.Entry(
+            edit_win, 
+            validate="focusout",
+            validatecommand=(edit_win.register(self.validate_time_format), '%P'))
         start_entry.insert(0, values[2])
         start_entry.grid(row=2, column=1)
         
         # 结束时间
         ttk.Label(edit_win, text="结束时间:").grid(row=3, column=0)
-        end_entry = ttk.Entry(edit_win)
+        end_entry = ttk.Entry(
+            edit_win, 
+            validate="focusout",
+            validatecommand=(edit_win.register(self.validate_time_format), '%P')
+        )
         end_entry.insert(0, values[3])
         end_entry.grid(row=3, column=1)
         
@@ -336,6 +491,16 @@ class AdvancedSettings:
 
         ttk.Button(edit_win, text="保存", command=save_changes).grid(row=5, columnspan=2, pady=5)
 
+    def validate_time_format(self, value):
+        if not value:
+            return True
+        try:
+            datetime.strptime(value, "%H:%M")
+            return True
+        except ValueError:
+            messagebox.showerror("格式错误", "请输入正确时间格式（HH:MM）")
+            return False
+
     def add_rule(self):
         rule_type = self.rule_type.get()
         if not rule_type:
@@ -351,140 +516,6 @@ class AdvancedSettings:
         elif rule_type == "教室分配限制":
             self.add_classroom_limit_rule()
 
-    def add_time_ban_rule(self):
-        win = tk.Toplevel(self.master)
-        win.title("添加禁止时间规则")
-        win.grab_set()  # 新增
-        win.transient(self.master)  # 新增
-        cw(win, 430, 105)
-
-        # 课程选择
-        ttk.Label(win, text="课程名称:").grid(row=0, column=0)
-        course_entry = ttk.Entry(win)
-        course_entry.grid(row=0, column=1)
-
-        # 禁止时间
-        ttk.Label(win, text="禁止时间段:").grid(row=1, column=0)
-        start_combo = ttk.Combobox(win, values=self.generate_time_options())
-        start_combo.grid(row=1, column=1)
-        ttk.Label(win, text="至").grid(row=1, column=2)
-        end_combo = ttk.Combobox(win, values=self.generate_time_options())
-        end_combo.grid(row=1, column=3)
-
-        # 适用日期
-        ttk.Label(win, text="适用日期:").grid(row=2, column=0)
-        days_frame = ttk.Frame(win)
-        days_frame.grid(row=2, column=1, columnspan=3)
-        days_vars = []
-        for i, day in enumerate(["周一", "周二", "周三", "周四", "周五", "周六", "周日"]):
-            var = tk.IntVar()
-            cb = ttk.Checkbutton(days_frame, text=day, variable=var)
-            cb.grid(row=0, column=i, padx=2)
-            days_vars.append(var)
-
-        def save_rule():
-            # 收集数据并添加到规则列表
-            course = course_entry.get()
-            time_range = f"{start_combo.get()}-{end_combo.get()}"
-            selected_days = [day for day, var in zip(["周一", "周二", "周三", "周四", "周五", "周六", "周日"], days_vars) if var.get()]
-
-            if course and time_range and selected_days:
-                rule_text = f"[禁止] {course} 在 {','.join(selected_days)} 的 {time_range}"
-                self.rules_list.insert(tk.END, rule_text)
-                win.destroy()
-
-        ttk.Button(win, text="添加", command=save_rule).grid(row=3, columnspan=4, pady=5)
-
-    def add_interval_rule(self):
-        win = tk.Toplevel(self.master)
-        win.title("添加课程间隔规则")
-        cw(win, 218, 122)
-
-        # 间隔时间输入
-        ttk.Label(win, text="最小间隔时间(分钟):").grid(row=0, column=0)
-        interval_entry = ttk.Entry(win)
-        interval_entry.grid(row=0, column=1)
-
-        win.grab_set()  # 新增：锁定主窗口
-        win.transient(self.master)
-
-        def save_rule():
-            interval = interval_entry.get()
-            if interval.isdigit() and int(interval) > 0:
-                rule_text = f"[间隔] 最小间隔时间为 {interval} 分钟"
-                self.rules_list.insert(tk.END, rule_text)
-                win.destroy()
-            else:
-                messagebox.showwarning("输入错误", "请输入有效的正整数作为间隔时间")
-
-        ttk.Button(win, text="添加", command=save_rule).grid(row=1, columnspan=2, pady=5)
-
-    def add_teacher_conflict_rule(self):
-        win = tk.Toplevel(self.master)
-        win.title("添加教师时间冲突规则")
-        cw(win, 430, 90)
-
-        win.grab_set()  # 新增：锁定主窗口
-        win.transient(self.master)
-
-        # 教师选择
-        ttk.Label(win, text="教师名称:").grid(row=0, column=0)
-        teacher_entry = ttk.Entry(win)
-        teacher_entry.grid(row=0, column=1)
-
-        # 不可用时间段
-        ttk.Label(win, text="不可用时间段:").grid(row=1, column=0)
-        start_combo = ttk.Combobox(win, values=self.generate_time_options())
-        start_combo.grid(row=1, column=1)
-        ttk.Label(win, text="至").grid(row=1, column=2)
-        end_combo = ttk.Combobox(win, values=self.generate_time_options())
-        end_combo.grid(row=1, column=3)
-
-        def save_rule():
-            teacher = teacher_entry.get()
-            time_range = f"{start_combo.get()}-{end_combo.get()}"
-            if teacher and time_range:
-                rule_text = f"[教师冲突] {teacher} 在 {time_range} 不可用"
-                self.rules_list.insert(tk.END, rule_text)
-                win.destroy()
-            else:
-                messagebox.showwarning("输入错误", "请填写教师名称和时间段")
-
-        ttk.Button(win, text="添加", command=save_rule).grid(row=2, columnspan=4, pady=5)
-
-    def add_classroom_limit_rule(self):
-        win = tk.Toplevel(self.master)
-        win.title("添加教室分配限制规则")
-        cw(win, 430, 90)
-
-        win.grab_set()  # 新增：锁定主窗口
-        win.transient(self.master)
-
-        # 教室选择
-        ttk.Label(win, text="教室名称:").grid(row=0, column=0)
-        classroom_entry = ttk.Entry(win)
-        classroom_entry.grid(row=0, column=1)
-
-        # 不可用时间段
-        ttk.Label(win, text="不可用时间段:").grid(row=1, column=0)
-        start_combo = ttk.Combobox(win, values=self.generate_time_options())
-        start_combo.grid(row=1, column=1)
-        ttk.Label(win, text="至").grid(row=1, column=2)
-        end_combo = ttk.Combobox(win, values=self.generate_time_options())
-        end_combo.grid(row=1, column=3)
-
-        def save_rule():
-            classroom = classroom_entry.get()
-            time_range = f"{start_combo.get()}-{end_combo.get()}"
-            if classroom and time_range:
-                rule_text = f"[教室限制] {classroom} 在 {time_range} 不可用"
-                self.rules_list.insert(tk.END, rule_text)
-                win.destroy()
-            else:
-                messagebox.showwarning("输入错误", "请填写教室名称和时间段")
-
-        ttk.Button(win, text="添加", command=save_rule).grid(row=2, columnspan=4, pady=5)
-
     def generate_time_options(self):
         times = []
         current = datetime.strptime("08:00", "%H:%M")
@@ -492,14 +523,6 @@ class AdvancedSettings:
             times.append(current.strftime("%H:%M"))
             current += timedelta(minutes=15)
         return times
-
-    def delete_rule(self):
-        selected = self.rules_list.curselection()
-        if selected:
-            self.rules_list.delete(selected[0])
-
-    def clear_rules(self):
-        self.rules_list.delete(0, tk.END)
 
     def export_settings(self):
         try:
@@ -517,12 +540,12 @@ class AdvancedSettings:
                     "cycle": self.cycle_combo.get(),
                     "max_duration": self.max_duration.get(),
                     "break_interval": self.break_interval.get(),
+                    "daily_periods": self.periods_spin.get(),  # 新增
                     "class_count": self.class_count.get(),
                     "grade": self.grade_entry.get()
                 },
                 "time_rules": [self.time_tree.item(item, 'values') 
                               for item in self.time_tree.get_children()],
-                "advanced_rules": list(self.rules_list.get(0, tk.END)),
                 "subjects": subjects
             }
 
@@ -547,6 +570,10 @@ class AdvancedSettings:
         self.break_interval.delete(0, tk.END)
         self.break_interval.insert(0, "10")
 
+        self.grade_entry.delete(0, tk.END)
+        self.grade_entry.insert(0, "三")
+        self.class_count.set(6)
+
         # 清空时间规则表格
         for item in self.time_tree.get_children():
             self.time_tree.delete(item)
@@ -558,8 +585,6 @@ class AdvancedSettings:
         self.time_tree.insert("", tk.END, values=("周五", "有","08:00", "17:00", 6))
         self.time_tree.insert("", tk.END, values=("周六", "无","", "", None))
         self.time_tree.insert("", tk.END, values=("周日", "按需","", "", None))
-        # 清空规则列表
-        self.rules_list.delete(0, tk.END)
 
 
 if __name__ == "__main__":

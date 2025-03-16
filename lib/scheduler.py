@@ -100,19 +100,19 @@ class GradeTimetableGenerator:
             for slot in morning_slots:
                 course = self.select_course(class_id, day, slot, is_morning=True,
                                            main_ratio=morning_main_ratio)
-                timetable[day]["courses"].append({
-                    "time": slot.strftime("%H:%M"),
-                    "course": course
-                })
+                entry = {"time": slot.strftime("%H:%M"), "course": course}
+                timetable[day]["courses"].append(entry)
+                # 新增：记录到历史
+                self.grade_history[class_id][day].append(entry)
             
             # 生成下午课程
             for slot in afternoon_slots:
                 course = self.select_course(class_id, day, slot, is_morning=False,
                                           main_ratio=main_ratio)
-                timetable[day]["courses"].append({
-                    "time": slot.strftime("%H:%M"),
-                    "course": course
-                })
+                entry = {"time": slot.strftime("%H:%M"), "course": course}
+                timetable[day]["courses"].append(entry)
+                # 新增：记录到历史
+                self.grade_history[class_id][day].append(entry)
         
         return timetable
 
@@ -149,6 +149,12 @@ class GradeTimetableGenerator:
             
             if teacher_available and self.check_constraints(subject, is_morning, main_ratio):
                 candidates.append(subject)
+        
+        # 新增：检查当前班级当天已排课程
+        current_day_history = self.grade_history[class_id][day]
+        if current_day_history:
+            last_course = current_day_history[-1]["course"]
+            candidates = [c for c in candidates if c != last_course]
         
         # 排除历史冲突
         candidates = [c for c in candidates if c not in class_history]
@@ -191,7 +197,7 @@ class GradeTimetableGenerator:
 
         try:
             # 验证模板路径
-            template_path = os.path.join("src", "tlp.xlsx")
+            template_path = os.path.join("src/tps", "c12.xlsx")
             if not os.path.exists(template_path):
                 raise FileNotFoundError(f"模板文件不存在于：{os.path.abspath(template_path)}")
 
@@ -200,7 +206,7 @@ class GradeTimetableGenerator:
             template_ws = wb["Sheet1"]
 
             # 列映射配置
-            column_mapping = {0:3, 1:4, 2:5, 3:6, 4:7}  # 周一至周五对应C-G列
+            column_mapping = {0:2, 1:3, 2:4, 3:5, 4:6}  # 周一至周五对应C-G列
 
             # 处理每个班级
             for class_idx, (class_name, schedule) in enumerate(timetable.items(), 1):
@@ -222,7 +228,7 @@ class GradeTimetableGenerator:
                 # 填充数据（从第3行开始）
                 for row_idx, time in enumerate(all_times, 3):
                     # 写入时间列
-                    new_ws.cell(row=row_idx, column=2, value=time)
+                    #new_ws.cell(row=row_idx, column=2, value=time)
                     
                     # 填充每日课程
                     for day_num in range(self.days):
@@ -244,39 +250,19 @@ class GradeTimetableGenerator:
         except Exception as e:
             print(f"生成失败：{str(e)}")
             return False
-# settings.json 示例配置
-"""
-{
-  "basic": {
-    "days": "5",
-    "cycle": "每周",
-    "max_duration": "45",
-    "break_interval": "10",
-    "class_count": "6",  // 新增班级数量
-    "grade": "三"        // 年级
-  },
-  "subjects": [
-    {"name": "语文", "teachers": 3},
-    {"name": "数学", "teachers": 2},
-    {"name": "英语", "teachers": 2},
-    "体育",
-    "美术",
-    "音乐"
-  ],
-  // 其他配置同前...
-}
-"""
-
+        
+        
 if __name__ == "__main__":
     generator = GradeTimetableGenerator()
     grade_timetable = generator.generate_grade()
     
     # 打印示例
     for class_name, timetable in grade_timetable.items():
-        print(f"\n{class_name}")
+        #print(f"\n{class_name}")
         for day in timetable.values():
-            print(f"\n{day['day']}")
+            #print(f"\n{day['day']}")
             for course in day["courses"]:
-                print(f"{course['time']} - {course['course']}")
+                #print(f"{course['time']} - {course['course']}")
+                pass
     
     generator.export_to_excel(grade_timetable, "grade_timetable.xlsx")
