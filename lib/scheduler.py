@@ -126,7 +126,6 @@ class GradeTimetableGenerator:
 
     def select_course(self, class_id, day, slot, is_morning, main_ratio):
         """课程选择逻辑"""
-        """修复后的课程选择逻辑"""
         prev_day = (day - 1) % self.days
         time_key = slot.strftime("%H:%M")
         
